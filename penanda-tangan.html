@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Penanda Tangan — Simpel-Pay</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --text:#1d1d1f;--muted:#6e6e73;--accent:#0a7aff;--red:#ff453a;
+  --glass:rgba(255,255,255,.72);--field:rgba(255,255,255,.9);--line:rgba(0,0,0,.1);--bar:rgba(255,255,255,.6);--track:rgba(120,120,128,.16);
+  --wall:linear-gradient(135deg,#9cbcff 0%,#c4b0fb 40%,#f9c4de 72%,#fde3bd 100%);
+  --shadow:0 14px 40px rgba(30,30,80,.2),0 0 0 .5px rgba(0,0,0,.14);
+}
+@media (prefers-color-scheme:dark){:root{--text:#f5f5f7;--muted:#a1a1a6;--accent:#2f8bff;--glass:rgba(40,40,46,.7);--field:rgba(70,70,78,.8);
+  --line:rgba(255,255,255,.14);--bar:rgba(20,20,26,.55);--track:rgba(255,255,255,.14);
+  --wall:linear-gradient(135deg,#1e2a5a 0%,#3b2a6e 40%,#6b2d5c 75%,#7a4a3a 100%);--shadow:0 14px 40px rgba(0,0,0,.5),0 0 0 .5px rgba(255,255,255,.14)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);color:var(--text);background:var(--wall) fixed;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+
+/* Navbar */
+.nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:8px 20px;padding-top:calc(8px + env(safe-area-inset-top));
+  background:var(--bar);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:.5px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.sch-logo{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;overflow:hidden;background:linear-gradient(160deg,#4da3ff,#0a5fe0);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 6px rgba(0,0,0,.22)}
+.sch-logo svg{width:20px;height:20px}.sch-logo img{width:100%;height:100%;object-fit:contain}
+.sch-name{min-width:0;line-height:1.2}
+.sch-name b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-name small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp{flex:1}
+.acct{display:flex;align-items:center;gap:10px;padding:4px 6px 4px 12px;border-radius:99px;background:var(--track)}
+.acct div{text-align:right;line-height:1.2}.acct b{display:block;font-size:13px}.acct small{font-size:11px;color:var(--muted)}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(160deg,#4da3ff,#7c3aed)}
+
+.wrap{max-width:none;margin:0;padding:22px min(150px,12vw)}
+.head{margin-bottom:18px}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:4px}
+h1{font-size:clamp(26px,4.5vw,36px);letter-spacing:-.025em;line-height:1.1}
+.head p{color:var(--muted);font-size:14px;margin-top:4px}
+
+/* Panel & kartu modal (selalu terang seperti halaman identitas) */
+.panel,.mcard{--text:#1d1d1f;--muted:#6e6e73;--field:rgba(255,255,255,.95);--line:rgba(0,0,0,.1);--track:rgba(120,120,128,.16);--accent:#0a7aff;--red:#ff453a;color:var(--text);
+  background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-radius:16px;box-shadow:var(--shadow);padding:20px}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ph .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.ph .ic svg{width:18px;height:18px}
+.ph h2{font-size:18px;letter-spacing:-.01em;line-height:1.2}
+.ph small{color:var(--muted);font-size:13px}
+.ph .cnt{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);background:var(--track);padding:3px 10px;border-radius:99px}
+
+/* Tabel */
+.tw{overflow-x:auto;border-radius:12px;box-shadow:inset 0 0 0 .5px var(--line);background:rgba(255,255,255,.55)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:11px 16px;background:rgba(120,120,128,.1);border-bottom:.5px solid var(--line);white-space:nowrap}
+td{padding:12px 16px;border-bottom:.5px solid var(--line);vertical-align:middle}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(10,122,255,.06)}
+tbody tr:last-child td{border-bottom:0}
+th.r,td.r{text-align:right}
+.idc{color:var(--muted);font-variant-numeric:tabular-nums;width:64px}
+.kode{display:inline-block;font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;padding:3px 9px;border-radius:7px;background:var(--track)}
+.pct{display:inline-block;font-weight:700;font-variant-numeric:tabular-nums;color:#0a62d1;background:rgba(10,122,255,.12);padding:3px 11px;border-radius:99px}
+.acts{display:flex;justify-content:flex-end;gap:4px}
+.ib{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted);transition:background .15s,color .15s}
+.ib:hover{background:var(--track);color:var(--accent)}.ib.del:hover{color:var(--red)}
+.ib svg{width:17px;height:17px}
+.state{padding:36px 16px;text-align:center;color:var(--muted);font-size:14px}
+.state svg{width:34px;height:34px;margin:0 auto 8px;display:block;opacity:.6}
+
+/* Form */
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+label i{color:var(--red);font-style:normal}
+.in{width:100%;font:inherit;font-size:15px;color:var(--text);padding:10px 12px;min-height:42px;border-radius:10px;border:0;background:var(--field);box-shadow:0 0 0 .5px var(--line),inset 0 1px 2px rgba(0,0,0,.06);transition:box-shadow .15s}
+.in::placeholder{color:#9a9aa0}
+.in:focus{outline:0;box-shadow:0 0 0 3px rgba(10,122,255,.4),0 0 0 1px var(--accent)}
+.in.bad{box-shadow:0 0 0 2px var(--red)}
+.in[readonly]{background:var(--track);color:var(--muted);cursor:not-allowed}
+textarea.in{resize:vertical;min-height:84px;line-height:1.45}
+select.in{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+select.in:invalid{color:#9a9aa0}select.in option{color:#1d1d1f}
+.nip{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ket{color:var(--muted);font-size:13px;max-width:340px;min-width:200px;white-space:pre-line}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.err{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.bad~.err{display:block}
+.fg{display:grid;gap:14px}
+.sfx{position:relative}.sfx .in{padding-right:40px}
+.sfx span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600;pointer-events:none}
+
+.btn{font-size:14px;font-weight:600;padding:9px 18px;min-height:40px;border-radius:10px;background:var(--track);transition:background .15s,transform .15s}
+.btn:hover{background:rgba(120,120,128,.28)}.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn.blue{background:var(--accent);color:#fff}.btn.blue:hover{background:#0062d6}
+.btn.red{background:var(--red);color:#fff}.btn.red:hover{background:#e0342a}
+
+/* Modal halus */
+.ov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:rgba(0,0,0,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);
+  visibility:hidden;pointer-events:none;transition:background .3s ease,backdrop-filter .3s ease,-webkit-backdrop-filter .3s ease,visibility 0s linear .35s}
+.ov.open{background:rgba(20,20,40,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);visibility:visible;pointer-events:auto;transition:background .3s ease,backdrop-filter .3s ease,-webkit-backdrop-filter .3s ease,visibility 0s}
+.mcard{width:min(440px,100%);max-height:calc(100vh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:auto;background:rgba(255,255,255,.9);opacity:0;transform:translateY(24px) scale(.94);transition:opacity .25s ease,transform .38s cubic-bezier(.2,.9,.25,1.15)}
+.ov.open .mcard{opacity:1;transform:none}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.mfoot .btn{min-width:92px}
+
+/* Dock */
+.dock{position:fixed!important;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-top:.5px solid rgba(0,0,0,.1);box-shadow:0 -4px 20px rgba(30,30,80,.12);transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform}
+.dock nav{--text:#1d1d1f;--track:rgba(120,120,128,.16);color:var(--text);width:100%;display:flex;justify-content:center;gap:6px;padding:8px}
+html,body{overflow-x:hidden}
+.d{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:92px;padding:8px 14px;border-radius:16px;font-size:12px;font-weight:600;transition:background .15s,transform .15s}
+.d:hover{background:var(--track);transform:translateY(-3px)}
+.d .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35)}
+.d .ic svg{width:21px;height:21px}
+
+/* Toast */
+.toast{position:fixed;top:calc(52px + env(safe-area-inset-top));right:14px;z-index:60;max-width:min(340px,calc(100% - 28px));display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--glass);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:var(--shadow);font-size:14px;transform:translateY(-20px);opacity:0;pointer-events:none;transition:.3s cubic-bezier(.2,.85,.25,1)}
+.toast.show{transform:none;opacity:1}
+.toast .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none;background:#28c840}
+.toast.er .ic{background:var(--red)}
+.toast svg{width:16px;height:16px}
+
+@media (max-width:640px){.acct div,.sch-name small{display:none}.acct{padding:3px}.wrap{padding:16px 5px}.nav{padding-left:5px;padding-right:5px}.panel{padding:16px}.d{min-width:84px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Transisi antar halaman */
+@view-transition{navigation:auto}
+.nav{view-transition-name:pt-nav}
+.dock{view-transition-name:pt-dock}
+@keyframes pt-out{to{opacity:0;transform:translateY(-8px) scale(.995)}}
+@keyframes pt-in{from{opacity:0;transform:translateY(12px) scale(.997)}}
+::view-transition-group(*){animation-duration:.35s}
+::view-transition-old(root){animation:.2s cubic-bezier(.4,0,1,1) both pt-out}
+::view-transition-new(root){animation:.4s cubic-bezier(.2,.8,.2,1) both pt-in}
+.pt-fb .wrap{animation:pt-in .4s cubic-bezier(.2,.8,.2,1) both}
+.pt-fb.pt-leave .wrap,.pt-fb.pt-leave .dock{opacity:0;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(root),::view-transition-new(root),.pt-fb .wrap{animation:none!important}}
+</style>
+<script>if(!('PageSwapEvent' in window))document.documentElement.classList.add('pt-fb');</script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">
+    <span class="sch-logo" id="navLogo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5"/></svg></span>
+    <span class="sch-name"><b id="navName">SMP Negeri 1 Contoh</b><small id="navSub">Kab. Contoh, Prov. Contoh</small></span>
+  </div>
+  <span class="sp"></span>
+  <div class="acct"><div><b>Budi Santoso</b><small>Admin Utama</small></div><span class="avatar">BS</span></div>
+</header>
+
+<main class="wrap">
+  <div class="head">
+    <p class="crumb">Menu Sistem › Penanda Tangan</p>
+    <h1>Penanda Tangan</h1>
+    <p>Kelola daftar penanda tangan kegiatan pembayaran beserta jabatannya.</p>
+  </div>
+
+  <section class="panel">
+    <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#c77dff,#8e3fd1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M5 16l9-9 3 3-9 9H5z"/></svg></span><div><h2>Daftar Penanda Tangan</h2></div><span class="cnt" id="cnt">0 data</span></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Id</th><th>Nama</th><th>NIP</th><th>Jabatan Dalam Kegiatan</th><th class="r">Aksi</th></tr></thead>
+        <tbody id="tb"><tr><td colspan="5" class="state">Memuat data…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<div class="dock">
+  <nav aria-label="Aksi halaman">
+    <a class="d" href="adminutama.html"><span class="ic" style="background:linear-gradient(160deg,#4da3ff,#0a5fe0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/></svg></span>Beranda</a>
+    <button class="d" id="addBtn" type="button"><span class="ic" style="background:linear-gradient(160deg,#5be37a,#1fa23c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>+ Penanda Tangan</button>
+  </nav>
+</div>
+
+<!-- Modal form -->
+<div class="ov" id="mForm" aria-hidden="true">
+  <form class="mcard" id="f" role="dialog" aria-modal="true" aria-labelledby="mTitle" novalidate autocomplete="off">
+    <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#c77dff,#8e3fd1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M5 16l9-9 3 3-9 9H5z"/></svg></span><div><h2 id="mTitle">Tambah Penanda Tangan</h2></div></div>
+    <div class="fg">
+      <div><label for="fid">Id</label><input class="in" id="fid" readonly tabindex="-1" placeholder="Otomatis"><p class="hint">Dibuat otomatis oleh sistem.</p></div>
+      <div><label for="fnama">Nama <i>*</i></label><input class="in" id="fnama" required maxlength="150" placeholder="Contoh: Drs. Budi Santoso, M.Pd."><p class="err">Nama wajib diisi.</p></div>
+      <div><label for="fnip">NIP</label><input class="in nip" id="fnip" inputmode="numeric" maxlength="18" placeholder="18 digit angka (kosongkan jika tidak ada)"><p class="hint">Opsional. Hanya angka, 18 digit.</p><p class="err">NIP harus 18 digit angka.</p></div>
+      <div><label for="fjab">Jabatan Dalam Kegiatan <i>*</i></label><select class="in" id="fjab" required><option value="" selected disabled>Pilih jabatan…</option><option>Pengawas</option><option>Kepala Sekolah</option><option>Bendahara</option><option>Pemeriksa</option><option>Pelaksana</option></select><p class="err">Pilih jabatan dalam kegiatan.</p></div>
+    </div>
+    <div class="mfoot"><button class="btn" type="button" id="cancelBtn">Cancel</button><button class="btn blue" type="submit" id="saveBtn">Simpan</button></div>
+  </form>
+</div>
+
+<!-- Modal hapus -->
+<div class="ov" id="mDel" aria-hidden="true">
+  <div class="mcard" role="alertdialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#ff7a8a,#e11d48)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></span><div><h2 id="dTitle">Hapus Penanda Tangan?</h2></div></div>
+    <p id="dMsg" style="font-size:14px;color:var(--muted)"></p>
+    <div class="mfoot"><button class="btn" type="button" id="dCancel">Cancel</button><button class="btn red" type="button" id="dOk">Hapus</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="tIc"><path d="M5 12l5 5 9-10"/></svg></span><span id="tMsg"></span></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  /* ===== Koneksi Supabase ===== */
+  var SB_URL=window.SIMPELPAY_CONFIG.SUPABASE_URL;
+  var SB_KEY=window.SIMPELPAY_CONFIG.SUPABASE_ANON_KEY;
+  var TABLE='penanda_tangan';
+  var AUTH={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
+  function hdr(x){var h={},k;for(k in AUTH)h[k]=AUTH[k];for(k in (x||{}))h[k]=x[k];return h}
+  function fail(r){return r.text().then(function(t){var m=t,c='';try{var j=JSON.parse(t);m=j.message||j.error||t;c=j.code||''}catch(e){}var e=new Error(m||('HTTP '+r.status));e.code=c;throw e})}
+  function el(i){return document.getElementById(i)}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+  var rows=[],editId=null,delId=null,lastFocus=null;
+
+  var tm;function toast(m,err){el('tMsg').textContent=m;var t=el('toast');t.classList.toggle('er',!!err);
+    el('tIc').innerHTML=err?'<path d="M12 6v8M12 18h.01"/>':'<path d="M5 12l5 5 9-10"/>';t.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('show')},3800)}
+
+  /* ===== Navbar: ambil nama sekolah (opsional) ===== */
+  fetch(SB_URL+'/rest/v1/identitas_sekolah?id=eq.1&select=nama_sekolah,kabupaten,provinsi,logo_url',{headers:hdr()})
+    .then(function(r){return r.ok?r.json():[]}).then(function(a){
+      var d=a&&a[0];if(!d)return;
+      if(d.nama_sekolah)el('navName').textContent=d.nama_sekolah;
+      var s=[d.kabupaten,d.provinsi].filter(Boolean).join(', ');if(s)el('navSub').textContent=s;
+      if(d.logo_url)el('navLogo').innerHTML='<img alt="" src="'+esc(d.logo_url)+'">';
+    }).catch(function(){});
+
+  /* ===== Tabel ===== */
+  var IC_EDIT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>';
+  var IC_DEL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+  function render(){
+    el('cnt').textContent=rows.length+' data';
+    if(!rows.length){el('tb').innerHTML='<tr><td colspan="5" class="state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M5 16l9-9 3 3-9 9H5z"/></svg>Belum ada penanda tangan. Klik <b>+ Penanda Tangan</b> untuk menambahkan.</td></tr>';return}
+    el('tb').innerHTML=rows.map(function(r){
+      return '<tr><td class="idc">'+r.id+'</td><td>'+esc(r.nama)+'</td><td class="nip">'+(r.nip?esc(r.nip):'<span style="opacity:.6">—</span>')+'</td><td><span class="pct">'+esc(r.jabatan)+'</span></td>'+
+        '<td><div class="acts"><button class="ib" data-e="'+r.id+'" aria-label="Ubah '+esc(r.nama)+'">'+IC_EDIT+'</button><button class="ib del" data-d="'+r.id+'" aria-label="Hapus '+esc(r.nama)+'">'+IC_DEL+'</button></div></td></tr>';
+    }).join('');
+  }
+  function load(){
+    return fetch(SB_URL+'/rest/v1/'+TABLE+'?select=*&order=id.asc',{headers:hdr()})
+      .then(function(r){return r.ok?r.json():fail(r)})
+      .then(function(a){rows=a||[];render()})
+      .catch(function(e){el('tb').innerHTML='<tr><td colspan="5" class="state">Gagal memuat data.</td></tr>';toast('Gagal memuat data: '+e.message,true)});
+  }
+  function byId(id){for(var i=0;i<rows.length;i++)if(rows[i].id==id)return rows[i]}
+  el('tb').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.e)openForm(byId(b.dataset.e),b);
+    if(b.dataset.d)openDel(byId(b.dataset.d),b);
+  });
+
+  /* ===== Modal ===== */
+  function openM(id,from){lastFocus=from||document.activeElement;var m=el(id);m.classList.add('open');m.setAttribute('aria-hidden','false')}
+  function closeM(id){var m=el(id);m.classList.remove('open');m.setAttribute('aria-hidden','true');if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+  ['mForm','mDel'].forEach(function(id){el(id).addEventListener('mousedown',function(e){if(e.target===this&&!busy)closeM(id)})});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!busy){if(el('mForm').classList.contains('open'))closeM('mForm');else if(el('mDel').classList.contains('open'))closeM('mDel')}});
+
+  var ids=['fnama','fnip','fjab'];
+  var rules={
+    fnama:function(v){return v.trim().length>0},
+    fnip:function(v){v=v.trim();return v===''||/^\d{18}$/.test(v)},
+    fjab:function(v){return v!==''}
+  };
+  function check(i){var ok=rules[i](el(i).value);el(i).classList.toggle('bad',!ok);return ok}
+  ids.forEach(function(i){el(i).addEventListener('blur',function(){check(i)});el(i).addEventListener('input',function(){if(el(i).classList.contains('bad'))check(i)});el(i).addEventListener('change',function(){if(el(i).classList.contains('bad'))check(i)})});
+  el('fnip').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'')});
+
+  function openForm(row,from){
+    editId=row?row.id:null;
+    el('mTitle').textContent=row?'Ubah Penanda Tangan':'Tambah Penanda Tangan';
+    el('fid').value=row?row.id:'';
+    el('fnama').value=row?row.nama:'';
+    el('fnip').value=row?(row.nip||''):'';
+    el('fjab').value=row?row.jabatan:'';
+    ids.forEach(function(i){el(i).classList.remove('bad')});
+    openM('mForm',from);
+    setTimeout(function(){el('fnama').focus()},250);
+  }
+  el('addBtn').addEventListener('click',function(){openForm(null,this)});
+  el('cancelBtn').addEventListener('click',function(){closeM('mForm')});
+
+  /* ===== Simpan (tambah / ubah) ===== */
+  var busy=false;
+  function setBusy(b){busy=b;el('saveBtn').disabled=b;el('cancelBtn').disabled=b;el('saveBtn').textContent=b?'Menyimpan…':'Simpan'}
+  el('f').addEventListener('submit',function(e){
+    e.preventDefault();if(busy)return;
+    var first=null;ids.forEach(function(i){if(!check(i)&&!first)first=i});
+    if(first){el(first).focus();return}
+    var d={nama:el('fnama').value.trim(),nip:el('fnip').value.trim()||null,jabatan:el('fjab').value};
+    var isNew=editId==null;
+    setBusy(true);
+    fetch(SB_URL+'/rest/v1/'+TABLE+(isNew?'':'?id=eq.'+editId),{method:isNew?'POST':'PATCH',headers:hdr({'Content-Type':'application/json','Prefer':'return=representation'}),body:JSON.stringify(d)})
+      .then(function(r){return r.ok?r.json():fail(r)})
+      .then(function(){closeM('mForm');toast(isNew?'Penanda tangan berhasil ditambahkan.':'Penanda tangan berhasil diperbarui.');return load()})
+      .catch(function(err){
+        if(err.code==='23505'){el('fnip').classList.add('bad');toast('NIP "'+d.nip+'" sudah terdaftar.',true)}
+        else toast('Gagal menyimpan: '+err.message,true);
+      })
+      .then(function(){setBusy(false)});
+  });
+
+  /* ===== Hapus ===== */
+  function openDel(row,from){if(!row)return;delId=row.id;el('dMsg').textContent='Data "'+row.nama+'" ('+row.jabatan+') akan dihapus permanen.';openM('mDel',from)}
+  el('dCancel').addEventListener('click',function(){closeM('mDel')});
+  el('dOk').addEventListener('click',function(){
+    if(busy||delId==null)return;busy=true;this.disabled=true;var btn=this;
+    fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+delId,{method:'DELETE',headers:hdr()})
+      .then(function(r){return r.ok?null:fail(r)})
+      .then(function(){busy=false;closeM('mDel');toast('Penanda tangan berhasil dihapus.');return load()})
+      .catch(function(err){toast('Gagal menghapus: '+err.message,true)})
+      .then(function(){busy=false;btn.disabled=false});
+  });
+
+  load();
+})();
+</script>
+<script>
+/* Fallback transisi untuk browser tanpa dukungan View Transitions */
+(function(){
+  var h=document.documentElement;
+  if(!h.classList.contains('pt-fb'))return;
+  window.addEventListener('pageshow',function(e){if(e.persisted)h.classList.remove('pt-leave')});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href]');
+    if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    if(a.target&&a.target!=='_self')return;
+    var u=new URL(a.href,location.href);
+    if(u.origin!==location.origin||(u.pathname===location.pathname&&u.search===location.search))return;
+    if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    e.preventDefault();h.classList.add('pt-leave');
+    setTimeout(function(){location.href=a.href},220);
+  });
+})();
+</script>
+</body>
+</html>

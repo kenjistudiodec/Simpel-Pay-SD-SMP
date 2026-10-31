@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Profil Bendahara — Simpel-Pay</title>
+<link rel="icon" type="image/png" href="logo.png">
+<script>
+/* Penjaga halaman: hanya untuk Bendahara yang sudah login lewat index.html */
+(function(){
+  var S=null;try{S=JSON.parse(sessionStorage.getItem('simpelpay_session')||'null')}catch(e){}
+  if(!S||S.role!=='bendahara'||!S.id){location.replace('index.html')}
+})();
+</script>
+<style>
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --text:#1d1d1f;--muted:#6e6e73;--accent:#0a7aff;--red:#ff453a;
+  --glass:rgba(255,255,255,.72);--field:rgba(255,255,255,.9);--line:rgba(0,0,0,.1);--bar:rgba(255,255,255,.6);--track:rgba(120,120,128,.16);
+  --wall:linear-gradient(135deg,#9cbcff 0%,#c4b0fb 40%,#f9c4de 72%,#fde3bd 100%);
+  --shadow:0 14px 40px rgba(30,30,80,.2),0 0 0 .5px rgba(0,0,0,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);color:var(--text);background:var(--wall) fixed;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+
+/* Navbar */
+.nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:8px 20px;padding-top:calc(8px + env(safe-area-inset-top));
+  background:var(--bar);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:.5px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.sch-logo{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;overflow:hidden;background:linear-gradient(160deg,#4da3ff,#0a5fe0);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 6px rgba(0,0,0,.22)}
+.sch-logo svg{width:20px;height:20px}.sch-logo img{width:100%;height:100%;object-fit:contain}
+.sch-name{min-width:0;line-height:1.2}
+.sch-name b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-name small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp{flex:1}
+.acct{display:flex;align-items:center;gap:10px;padding:4px 6px 4px 12px;border-radius:99px;background:var(--track)}
+.acct div{text-align:right;line-height:1.2}.acct b{display:block;font-size:13px}.acct small{font-size:11px;color:var(--muted)}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(160deg,#4da3ff,#7c3aed);overflow:hidden;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+.wrap{max-width:none;margin:0;padding:22px min(150px,12vw)}
+.head{margin-bottom:18px}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:4px}
+h1{font-size:clamp(26px,4.5vw,36px);letter-spacing:-.025em;line-height:1.1}
+.head p{color:var(--muted);font-size:14px;margin-top:4px}
+
+/* Panel & kartu modal */
+.panel,.mcard{--text:#1d1d1f;--muted:#6e6e73;--field:rgba(255,255,255,.95);--line:rgba(0,0,0,.1);--track:rgba(120,120,128,.16);--accent:#0a7aff;--red:#ff453a;color:var(--text);
+  background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-radius:16px;box-shadow:var(--shadow);padding:20px}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ph .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.ph .ic svg{width:18px;height:18px}
+.ph h2{font-size:18px;letter-spacing:-.01em;line-height:1.2}
+.ph .cnt{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);background:var(--track);padding:3px 10px;border-radius:99px}
+
+/* Tabel */
+.tw{overflow-x:auto;border-radius:12px;box-shadow:inset 0 0 0 .5px var(--line);background:rgba(255,255,255,.55)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:1380px}
+th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:11px 16px;background:rgba(120,120,128,.1);border-bottom:.5px solid var(--line);white-space:nowrap}
+td{padding:12px 16px;border-bottom:.5px solid var(--line);vertical-align:middle}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(10,122,255,.06)}
+tbody tr:last-child td{border-bottom:0}
+th.r,td.r{text-align:right}
+.idc{color:var(--muted);font-variant-numeric:tabular-nums;width:64px}
+.kode{display:inline-block;font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;padding:3px 9px;border-radius:7px;background:var(--track)}
+.who{display:flex;align-items:center;gap:12px;min-width:0}
+.ph-th{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(160deg,#4da3ff,#7c3aed);overflow:hidden;box-shadow:0 0 0 .5px rgba(0,0,0,.14)}
+.ph-th img{width:100%;height:100%;object-fit:cover}
+.who b{font-weight:600}
+.badge{display:inline-block;font-weight:600;font-size:12px;padding:3px 11px;border-radius:99px;white-space:nowrap}
+.badge.kepsek{color:#0a62d1;background:rgba(10,122,255,.12)}
+.badge.bend{color:#1b7f35;background:rgba(40,200,64,.16)}
+.acts{display:flex;justify-content:flex-end;gap:4px}
+.ib{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted);transition:background .15s,color .15s}
+.ib:hover{background:var(--track);color:var(--accent)}.ib.del:hover{color:var(--red)}
+.ib svg{width:17px;height:17px}
+.state{padding:36px 16px;text-align:center;color:var(--muted);font-size:14px}
+.state svg{width:34px;height:34px;margin:0 auto 8px;display:block;opacity:.6}
+.pw{letter-spacing:.15em;color:var(--muted)}
+
+/* Form */
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+label i{color:var(--red);font-style:normal}
+.in{width:100%;font:inherit;font-size:15px;color:var(--text);padding:10px 12px;min-height:42px;border-radius:10px;border:0;background:var(--field);box-shadow:0 0 0 .5px var(--line),inset 0 1px 2px rgba(0,0,0,.06);transition:box-shadow .15s}
+.in::placeholder{color:#9a9aa0}
+.in:focus{outline:0;box-shadow:0 0 0 3px rgba(10,122,255,.4),0 0 0 1px var(--accent)}
+.in.bad{box-shadow:0 0 0 2px var(--red)}
+.in[readonly]{background:var(--track);color:var(--muted);cursor:not-allowed}
+select.in{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.err{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.bad~.err,.bad+.err,.sfx:has(.bad)~.err{display:block}
+.fg{display:grid;gap:14px}
+.sfx{position:relative}.sfx .in{padding-right:46px}
+.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
+.eye:hover{background:var(--track);color:var(--accent)}.eye svg{width:18px;height:18px}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+textarea.in{resize:vertical;min-height:84px;line-height:1.45}
+input[type=date].in{min-height:42px}
+.badge.st{color:#5b3fc4;background:rgba(124,58,237,.12)}
+.badge.nst{color:#555;background:var(--track)}
+.alm{color:var(--muted);font-size:13px;min-width:200px;max-width:280px;white-space:pre-line}
+.dash{opacity:.6}
+/* Foto */
+.pbox{display:flex;align-items:center;gap:16px}
+.pprev{flex:none;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--track);overflow:hidden;box-shadow:0 0 0 .5px var(--line)}
+.pprev svg{width:30px;height:30px;opacity:.7}.pprev img{width:100%;height:100%;object-fit:cover}
+.pbtns{display:flex;flex-wrap:wrap;gap:8px}
+.btn.sm{padding:6px 14px;min-height:34px;font-size:13px}
+.pbtns+.hint{margin-top:8px}
+
+.btn{font-size:14px;font-weight:600;padding:9px 18px;min-height:40px;border-radius:10px;background:var(--track);transition:background .15s,transform .15s}
+.btn:hover{background:rgba(120,120,128,.28)}.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn.blue{background:var(--accent);color:#fff}.btn.blue:hover{background:#0062d6}
+.btn.red{background:var(--red);color:#fff}.btn.red:hover{background:#e0342a}
+
+/* Modal */
+.ov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;overflow:hidden;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:rgba(0,0,0,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);
+  visibility:hidden;pointer-events:none;transition:background .3s ease,backdrop-filter .3s ease,-webkit-backdrop-filter .3s ease,visibility 0s linear .35s}
+.ov.open{background:rgba(20,20,40,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);visibility:visible;pointer-events:auto;transition:background .3s ease,backdrop-filter .3s ease,-webkit-backdrop-filter .3s ease,visibility 0s}
+.mcard{width:min(440px,100%);max-height:calc(100vh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:rgba(255,255,255,.9);opacity:0;transform:translateY(24px) scale(.94);transition:opacity .25s ease,transform .38s cubic-bezier(.2,.9,.25,1.15)}
+.ov.open .mcard{opacity:1;transform:none}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.mfoot .btn{min-width:92px}
+
+/* Dock */
+.dock{position:fixed!important;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;display:flex;justify-content:center;padding:0 12px;background:none;border:0;box-shadow:none;pointer-events:none;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform}
+html,body{overflow-x:hidden}
+.dock nav{--text:#1d1d1f;--track:rgba(120,120,128,.16);color:var(--text);width:auto;max-width:100%;display:flex;justify-content:center;gap:6px;padding:8px 12px;pointer-events:auto;
+  background:rgba(255,255,255,.45);backdrop-filter:saturate(180%) blur(28px);-webkit-backdrop-filter:saturate(180%) blur(28px);
+  border:.5px solid rgba(255,255,255,.55);border-radius:32px;box-shadow:0 10px 30px rgba(30,30,80,.22),inset 0 1px 0 rgba(255,255,255,.5)}
+@media (prefers-color-scheme:dark){.dock nav{--text:#f5f5f7;--track:rgba(255,255,255,.14);background:rgba(40,40,46,.5);border-color:rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}}
+.d{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:92px;padding:8px 14px;border-radius:16px;font-size:12px;font-weight:600;transition:background .15s,transform .15s}
+.d:hover{background:var(--track);transform:translateY(-3px)}
+.d .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35)}
+.d .ic svg{width:21px;height:21px}
+
+/* Toast */
+.toast{position:fixed;top:calc(52px + env(safe-area-inset-top));right:14px;z-index:60;max-width:min(340px,calc(100% - 28px));display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--glass);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:var(--shadow);font-size:14px;transform:translateY(-20px);opacity:0;pointer-events:none;transition:.3s cubic-bezier(.2,.85,.25,1)}
+.toast.show{transform:none;opacity:1}
+.toast .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none;background:#28c840}
+.toast.er .ic{background:var(--red)}
+.toast svg{width:16px;height:16px}
+
+@media (max-width:640px){.acct div,.sch-name small{display:none}.acct{padding:3px}.wrap{padding:16px 5px}.nav{padding-left:5px;padding-right:5px}.panel{padding:16px}.d{min-width:84px}.pbox{flex-direction:column;align-items:flex-start}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Transisi antar halaman */
+@view-transition{navigation:auto}
+.nav{view-transition-name:pt-nav}
+.dock{view-transition-name:pt-dock}
+@keyframes pt-out{to{opacity:0;transform:translateY(-8px) scale(.995)}}
+@keyframes pt-in{from{opacity:0;transform:translateY(12px) scale(.997)}}
+::view-transition-group(*){animation-duration:.35s}
+::view-transition-old(root){animation:.2s cubic-bezier(.4,0,1,1) both pt-out}
+::view-transition-new(root){animation:.4s cubic-bezier(.2,.8,.2,1) both pt-in}
+.pt-fb .wrap{animation:pt-in .4s cubic-bezier(.2,.8,.2,1) both}
+.pt-fb.pt-leave .wrap,.pt-fb.pt-leave .dock{opacity:0;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(root),::view-transition-new(root),.pt-fb .wrap{animation:none!important}}
+
+.in:disabled{background:var(--track);color:var(--muted);cursor:not-allowed;opacity:1}
+.state .btn{margin-top:12px}
+</style>
+<script>if(!('PageSwapEvent' in window))document.documentElement.classList.add('pt-fb');</script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">
+    <span class="sch-logo" id="navLogo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5"/></svg></span>
+    <span class="sch-name"><b id="navName">SMP Negeri 1 Contoh</b><small id="navSub">Kab. Contoh, Prov. Contoh</small></span>
+  </div>
+  <span class="sp"></span>
+  <div class="acct"><div><b id="acName">Bendahara</b><small>Bendahara</small></div><span class="avatar" id="acAva">B</span></div>
+</header>
+
+<main class="wrap">
+  <div class="head">
+    <p class="crumb">Menu Bendahara › Profil Bendahara</p>
+    <h1>Profil Bendahara</h1>
+    <p>Perbarui data akun yang sedang masuk.</p>
+  </div>
+
+  <section class="panel">
+    <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#4da3ff,#0a5fe0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><div><h2>Data Akun</h2></div><span class="cnt" id="cnt">Akun saya</span></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Id</th><th>Admin</th><th>NIP</th><th>Tempat, Tgl Lahir</th><th>Status</th><th>Golongan</th><th>Alamat</th><th>Jabatan</th><th>Username</th><th>Password</th><th class="r">Aksi</th></tr></thead>
+        <tbody id="tb"><tr><td colspan="11" class="state">Memuat data…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<div class="dock">
+  <nav aria-label="Aksi halaman">
+    <a class="d" href="adminbendahara.html"><span class="ic" style="background:linear-gradient(160deg,#4da3ff,#0a5fe0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/></svg></span>Beranda</a>
+    <button class="d" id="editBtn" type="button" disabled><span class="ic" style="background:linear-gradient(160deg,#ffb454,#f0780a)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg></span>Ubah Profil</button>
+  </nav>
+</div>
+
+<!-- Modal form -->
+<div class="ov" id="mForm" aria-hidden="true">
+  <form class="mcard" id="f" role="dialog" aria-modal="true" aria-labelledby="mTitle" novalidate autocomplete="off">
+    <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#ffb454,#f0780a)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg></span><div><h2 id="mTitle">Ubah Profil</h2></div></div>
+    <div class="fg">
+      <div>
+        <label for="fphoto">Foto</label>
+        <div class="pbox">
+          <span class="pprev" id="pprev"></span>
+          <div>
+            <div class="pbtns"><button class="btn sm" type="button" id="pickBtn">Pilih foto</button><button class="btn sm" type="button" id="rmBtn" hidden>Hapus foto</button></div>
+            <p class="hint">JPG, PNG, atau WebP. Maksimal 2 MB.</p>
+            <p class="err" id="phErr"></p>
+          </div>
+        </div>
+        <input type="file" id="fphoto" accept="image/jpeg,image/png,image/webp" hidden>
+      </div>
+      <div><label for="fid">Id</label><input class="in" id="fid" readonly tabindex="-1"><p class="hint">Tidak dapat diubah.</p></div>
+      <div><label for="fnama">Nama Admin <i>*</i></label><input class="in" id="fnama" required maxlength="100" placeholder="Contoh: Siti Aminah, S.Pd."><p class="err">Nama admin wajib diisi.</p></div>
+      <div><label for="fnip">NIP <i>*</i></label><input class="in" id="fnip" required inputmode="numeric" maxlength="25" placeholder="Contoh: 198001012005012001"><p class="err" id="nipErr">NIP wajib diisi (5–25 digit angka).</p></div>
+      <div class="row2">
+        <div><label for="ftempat">Tempat Lahir <i>*</i></label><input class="in" id="ftempat" required maxlength="60" placeholder="Contoh: Muntok"><p class="err">Tempat lahir wajib diisi.</p></div>
+        <div><label for="ftgl">Tanggal Lahir <i>*</i></label><input class="in" id="ftgl" type="date" required><p class="err">Isi tanggal lahir yang valid.</p></div>
+      </div>
+      <div class="row2">
+        <div><label for="fstat">Status <i>*</i></label>
+          <select class="in" id="fstat" required><option value="">Pilih status</option><option value="ASN">ASN</option><option value="PPPK">PPPK</option><option value="Non ASN">Non ASN</option></select>
+          <p class="err">Pilih status.</p></div>
+        <div><label for="fgol">Golongan</label>
+          <select class="in" id="fgol" disabled><option value="">Pilih status dulu</option></select>
+          <p class="err">Pilih golongan.</p></div>
+      </div>
+      <p class="hint" style="margin-top:-6px">Golongan diisi untuk ASN atau PPPK. Untuk Non ASN otomatis “-”.</p>
+      <div><label for="falamat">Alamat <i>*</i></label><textarea class="in" id="falamat" required rows="3" maxlength="250" placeholder="Alamat lengkap tempat tinggal"></textarea><p class="err">Alamat wajib diisi.</p></div>
+      <div><label for="fjab">Jabatan</label>
+        <select class="in" id="fjab" disabled><option value="Kepala Sekolah">Kepala Sekolah</option><option value="Bendahara">Bendahara</option></select>
+        <p class="hint">Jabatan hanya dapat diubah oleh Admin Utama.</p></div>
+      <div><label for="fuser">Username <i>*</i></label><input class="in" id="fuser" required maxlength="30" autocapitalize="none" spellcheck="false" placeholder="Contoh: bendahara.siti"><p class="err" id="userErr">Username 3–30 karakter (huruf, angka, titik, - atau _).</p></div>
+      <div><label for="fpass">Password baru</label>
+        <div class="sfx"><input class="in" id="fpass" type="password" maxlength="60" autocomplete="new-password" placeholder="Kosongkan jika tidak diubah"><button class="eye" type="button" id="eyeBtn" aria-label="Tampilkan password"></button></div>
+        <p class="err">Password baru minimal 6 karakter.</p></div>
+    </div>
+    <div class="mfoot"><button class="btn" type="button" id="cancelBtn">Cancel</button><button class="btn blue" type="submit" id="saveBtn">Simpan</button></div>
+  </form>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="tIc"><path d="M5 12l5 5 9-10"/></svg></span><span id="tMsg"></span></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  /* ===== Koneksi Supabase ===== */
+  var SB_URL=window.SIMPELPAY_CONFIG.SUPABASE_URL;
+  var SB_KEY=window.SIMPELPAY_CONFIG.SUPABASE_ANON_KEY;
+  var TABLE='admin_role',BUCKET='aset',FOLDER='admin';
+  var PUB=SB_URL+'/storage/v1/object/public/'+BUCKET+'/';
+  var AUTH={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
+  function hdr(x){var h={},k;for(k in AUTH)h[k]=AUTH[k];for(k in (x||{}))h[k]=x[k];return h}
+  function fail(r){return r.text().then(function(t){var m=t,c='';try{var j=JSON.parse(t);m=j.message||j.error||t;c=j.code||''}catch(e){}var e=new Error(m||('HTTP '+r.status));e.code=c;throw e})}
+  function el(i){return document.getElementById(i)}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function initials(n){var p=String(n).replace(/,.*$/,'').trim().split(/\s+/).filter(Boolean);return ((p[0]||'?')[0]+(p.length>1?p[1][0]:'')).toUpperCase()}
+
+  /* ===== Sesi login ===== */
+  var S=null;try{S=JSON.parse(sessionStorage.getItem('simpelpay_session')||'null')}catch(e){}
+  if(!S||S.role!=='bendahara'||!S.id)return;
+  var ME=S.id,row=null,lastFocus=null;
+  function saveSession(){try{sessionStorage.setItem('simpelpay_session',JSON.stringify(S))}catch(e){}}
+
+  var tm;function toast(m,err){el('tMsg').textContent=m;var t=el('toast');t.classList.toggle('er',!!err);
+    el('tIc').innerHTML=err?'<path d="M12 6v8M12 18h.01"/>':'<path d="M5 12l5 5 9-10"/>';t.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('show')},3800)}
+
+  /* ===== Navbar ===== */
+  function setAcct(){
+    var nm=S.nama||S.user||'Bendahara',av=el('acAva');
+    el('acName').textContent=nm;
+    if(S.foto){av.innerHTML='<img alt="" src="'+esc(S.foto)+'">';av.firstChild.onerror=function(){av.textContent=initials(nm)}}
+    else av.textContent=initials(nm);
+  }
+  setAcct();
+  fetch(SB_URL+'/rest/v1/identitas_sekolah?id=eq.1&select=nama_sekolah,kabupaten,provinsi,logo_url',{headers:hdr()})
+    .then(function(r){return r.ok?r.json():[]}).then(function(a){
+      var d=a&&a[0];if(!d)return;
+      if(d.nama_sekolah)el('navName').textContent=d.nama_sekolah;
+      var s=[d.kabupaten,d.provinsi].filter(Boolean).join(', ');if(s)el('navSub').textContent=s;
+      if(d.logo_url)el('navLogo').innerHTML='<img alt="" src="'+esc(d.logo_url)+'">';
+    }).catch(function(){});
+
+  /* ===== Tabel (satu baris: akun yang login) ===== */
+  var IC_EDIT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>';
+  var IC_USER='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.2-6 8-6s6.8 2 8 6"/></svg>';
+  var IC_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var IC_EYEX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6A17 17 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 4-.8M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  function render(){
+    el('editBtn').disabled=!row;
+    if(!row){el('tb').innerHTML='<tr><td colspan="11" class="state">Akun tidak ditemukan. Silakan <a href="index.html" style="color:var(--accent);font-weight:600">login ulang</a>.</td></tr>';return}
+    var kep=row.jabatan==='Kepala Sekolah';
+    el('tb').innerHTML='<tr><td class="idc">'+row.id+'</td><td><div class="who"><span class="ph-th">'+(row.foto_url?'<img alt="" src="'+esc(row.foto_url)+'">':esc(initials(row.nama_admin)))+'</span><b>'+esc(row.nama_admin)+'</b></div></td><td><span class="kode">'+esc(row.nip)+'</span></td>'+
+      newCells(row)+'<td><span class="badge '+(kep?'kepsek':'bend')+'">'+esc(row.jabatan)+'</span></td><td>'+esc(row.username)+'</td><td class="pw" aria-label="Disembunyikan">••••••••</td>'+
+      '<td><div class="acts"><button class="ib" id="rowEdit" aria-label="Ubah profil">'+IC_EDIT+'</button></div></td></tr>';
+    el('rowEdit').addEventListener('click',function(){openForm(this)});
+  }
+  function load(){
+    return fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(ME)+'&select=*&limit=1',{headers:hdr()})
+      .then(function(r){
+        if(r.status===404)throw new Error('Tabel admin_role belum dibuat.');
+        return r.ok?r.json():fail(r)})
+      .then(function(a){row=(a&&a[0])||null;render()})
+      .catch(function(e){row=null;el('editBtn').disabled=true;el('tb').innerHTML='<tr><td colspan="11" class="state">Gagal memuat data.</td></tr>';toast('Gagal memuat data: '+e.message,true)});
+  }
+
+  /* ===== Storage (bucket aset) ===== */
+  function pathFromUrl(u){return u&&u.indexOf(PUB)===0?decodeURIComponent(u.slice(PUB.length).split('?')[0]):null}
+  function uploadFoto(file){
+    var ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    var path=FOLDER+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    return fetch(SB_URL+'/storage/v1/object/'+BUCKET+'/'+path,{method:'POST',headers:hdr({'Content-Type':file.type||'application/octet-stream','Cache-Control':'3600','x-upsert':'false'}),body:file})
+      .then(function(r){return r.ok?r.json():fail(r)})
+      .then(function(){return PUB+path});
+  }
+  function removeFoto(url){
+    var p=pathFromUrl(url);if(!p)return Promise.resolve();
+    return fetch(SB_URL+'/storage/v1/object/'+BUCKET+'/'+p,{method:'DELETE',headers:hdr()}).catch(function(){});
+  }
+
+  /* ===== Modal ===== */
+  function openM(id,from){lastFocus=from||document.activeElement;var m=el(id);m.classList.add('open');m.setAttribute('aria-hidden','false')}
+  function closeM(id){var m=el(id);m.classList.remove('open');m.setAttribute('aria-hidden','true');if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+  el('mForm').addEventListener('mousedown',function(e){if(e.target===this&&!busy)closeM('mForm')});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!busy&&el('mForm').classList.contains('open'))closeM('mForm')});
+
+  var ids=['fnama','fnip','ftempat','ftgl','fstat','fgol','falamat','fuser','fpass'];
+  var rules={
+    fnama:function(v){return v.trim().length>0},
+    fnip:function(v){return /^[0-9]{5,25}$/.test(v.trim())},
+    ftempat:function(v){return v.trim().length>0},
+    ftgl:function(v){return /^\d{4}-\d{2}-\d{2}$/.test(v)&&v>=el('ftgl').min&&v<=el('ftgl').max},
+    fstat:function(v){return v==='ASN'||v==='PPPK'||v==='Non ASN'},
+    fgol:function(v){var st=el('fstat').value;if(!st)return true;if(st==='Non ASN')return v==='-';return GOL[st].indexOf(v)>-1},
+    falamat:function(v){return v.trim().length>0},
+    fuser:function(v){return /^[A-Za-z0-9._-]{3,30}$/.test(v.trim())},
+    fpass:function(v){return v===''||v.length>=6}
+  };
+  function check(i){var ok=rules[i](el(i).value);el(i).classList.toggle('bad',!ok);return ok}
+  ids.forEach(function(i){var ev=(el(i).tagName==='SELECT'||el(i).type==='date')?'change':'input';el(i).addEventListener('blur',function(){check(i)});el(i).addEventListener(ev,function(){if(el(i).classList.contains('bad'))check(i)})});
+  el('fnip').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'')});
+  el('fuser').addEventListener('input',function(){this.value=this.value.toLowerCase().replace(/\s/g,'')});
+  var MSG={fnip:el('nipErr').textContent,fuser:el('userErr').textContent};
+  ['fnip','fuser'].forEach(function(i){el(i).addEventListener('input',function(){el(i==='fnip'?'nipErr':'userErr').textContent=MSG[i]})});
+
+  /* ===== Tanggal lahir, status & golongan ===== */
+  var GOL={
+    ASN:['I/a','I/b','I/c','I/d','II/a','II/b','II/c','II/d','III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d','IV/e'],
+    PPPK:['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII']
+  };
+  (function(){var t=new Date(),m=('0'+(t.getMonth()+1)).slice(-2),d=('0'+t.getDate()).slice(-2);el('ftgl').min='1940-01-01';el('ftgl').max=t.getFullYear()+'-'+m+'-'+d})();
+  function fillGol(sel){
+    var st=el('fstat').value,g=el('fgol'),h;
+    if(st==='ASN'||st==='PPPK'){
+      h='<option value="">Pilih golongan</option>'+GOL[st].map(function(x){return '<option value="'+x+'">'+x+'</option>'}).join('');
+      g.innerHTML=h;g.disabled=false;g.value=GOL[st].indexOf(sel)>-1?sel:'';
+    }else if(st==='Non ASN'){
+      g.innerHTML='<option value="-">-</option>';g.disabled=true;g.value='-';
+    }else{
+      g.innerHTML='<option value="">Pilih status dulu</option>';g.disabled=true;g.value='';
+    }
+    g.classList.remove('bad');
+  }
+  el('fstat').addEventListener('change',function(){fillGol('')});
+  function fmtDate(s){
+    var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');if(!m)return '';
+    return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  }
+  var DASH='<span class="dash">—</span>';
+  function newCells(r){
+    var ttl=[r.tempat_lahir,fmtDate(r.tanggal_lahir)].filter(Boolean).map(esc).join(', ');
+    var st=r.status||'';
+    return '<td>'+(ttl||DASH)+'</td>'+
+      '<td>'+(st?'<span class="badge '+(st==='Non ASN'?'nst':'st')+'">'+esc(st)+'</span>':DASH)+'</td>'+
+      '<td>'+(r.golongan?'<span class="kode">'+esc(r.golongan)+'</span>':DASH)+'</td>'+
+      '<td class="alm">'+(r.alamat?esc(r.alamat):DASH)+'</td>';
+  }
+
+  el('eyeBtn').innerHTML=IC_EYE;
+  el('eyeBtn').addEventListener('click',function(){var p=el('fpass'),s=p.type==='password';p.type=s?'text':'password';this.innerHTML=s?IC_EYEX:IC_EYE;this.setAttribute('aria-label',s?'Sembunyikan password':'Tampilkan password')});
+
+  /* Foto */
+  var newFile=null,oldUrl='',dropPhoto=false,objUrl=null;
+  function setPrev(src){
+    el('pprev').innerHTML=src?'<img alt="Pratinjau foto" src="'+esc(src)+'">':IC_USER;
+    el('rmBtn').hidden=!src;
+    el('pickBtn').textContent=src?'Ganti foto':'Pilih foto';
+  }
+  function clearObj(){if(objUrl){URL.revokeObjectURL(objUrl);objUrl=null}}
+  function phErr(m){var p=el('phErr');p.textContent=m||'';p.style.display=m?'block':'none'}
+  el('pickBtn').addEventListener('click',function(){el('fphoto').click()});
+  el('fphoto').addEventListener('change',function(){
+    var f=this.files&&this.files[0];this.value='';if(!f)return;
+    if(['image/jpeg','image/png','image/webp'].indexOf(f.type)<0){phErr('Format foto harus JPG, PNG, atau WebP.');return}
+    if(f.size>2*1024*1024){phErr('Ukuran foto maksimal 2 MB.');return}
+    phErr('');clearObj();newFile=f;dropPhoto=false;objUrl=URL.createObjectURL(f);setPrev(objUrl);
+  });
+  el('rmBtn').addEventListener('click',function(){phErr('');clearObj();newFile=null;dropPhoto=!!oldUrl;setPrev('')});
+
+  function openForm(from){
+    if(!row)return;
+    el('fid').value=row.id;
+    el('fnama').value=row.nama_admin;
+    el('fnip').value=row.nip;
+    el('fjab').value=row.jabatan;
+    el('ftempat').value=row.tempat_lahir||'';
+    el('ftgl').value=row.tanggal_lahir||'';
+    el('fstat').value=row.status||'';
+    fillGol(row.golongan);
+    el('falamat').value=row.alamat||'';
+    el('fuser').value=row.username;
+    el('fpass').value='';el('fpass').type='password';el('eyeBtn').innerHTML=IC_EYE;el('eyeBtn').setAttribute('aria-label','Tampilkan password');
+    el('nipErr').textContent=MSG.fnip;el('userErr').textContent=MSG.fuser;
+    newFile=null;dropPhoto=false;clearObj();oldUrl=row.foto_url||'';phErr('');setPrev(oldUrl);
+    ids.forEach(function(i){el(i).classList.remove('bad')});
+    openM('mForm',from);
+    setTimeout(function(){el('fnama').focus()},250);
+  }
+  el('editBtn').addEventListener('click',function(){openForm(this)});
+  el('cancelBtn').addEventListener('click',function(){closeM('mForm')});
+
+  /* ===== Simpan perubahan ===== */
+  var busy=false;
+  function setBusy(b){busy=b;el('saveBtn').disabled=b;el('cancelBtn').disabled=b;el('saveBtn').textContent=b?'Menyimpan…':'Simpan'}
+  el('f').addEventListener('submit',function(e){
+    e.preventDefault();if(busy||!row)return;
+    var first=null;ids.forEach(function(i){if(!check(i)&&!first)first=i});
+    if(first){el(first).focus();return}
+    var d={nama_admin:el('fnama').value.trim(),nip:el('fnip').value.trim(),tempat_lahir:el('ftempat').value.trim(),tanggal_lahir:el('ftgl').value,status:el('fstat').value,golongan:el('fgol').value,alamat:el('falamat').value.trim(),username:el('fuser').value.trim().toLowerCase()};
+    if(el('fpass').value)d.password=el('fpass').value;
+    var uploaded=null;
+    setBusy(true);
+    var step=newFile?uploadFoto(newFile).then(function(u){uploaded=u;d.foto_url=u}):Promise.resolve(dropPhoto&&(d.foto_url=null));
+    step
+      .then(function(){return fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.'+encodeURIComponent(ME),{method:'PATCH',headers:hdr({'Content-Type':'application/json','Prefer':'return=representation'}),body:JSON.stringify(d)})})
+      .then(function(r){return r.ok?r.json():fail(r)})
+      .then(function(a){
+        if(!a||!a.length)throw new Error('Akun tidak ditemukan.');
+        if(oldUrl&&(newFile||dropPhoto))removeFoto(oldUrl);
+        S.nama=a[0].nama_admin;S.user=a[0].username;S.foto=a[0].foto_url||'';saveSession();setAcct();
+        closeM('mForm');toast('Profil berhasil diperbarui.');return load();
+      })
+      .catch(function(err){
+        if(uploaded)removeFoto(uploaded);
+        var m=(err.message||'');
+        if(err.code==='23505'){
+          if(m.indexOf('nip')>-1){el('fnip').classList.add('bad');el('nipErr').textContent='NIP sudah terdaftar.';toast('NIP "'+d.nip+'" sudah terdaftar.',true)}
+          else{el('fuser').classList.add('bad');el('userErr').textContent='Username sudah digunakan.';toast('Username "'+d.username+'" sudah digunakan.',true)}
+        }else if(/bucket|row-level security|storage/i.test(m)&&newFile)toast('Gagal mengunggah foto: '+m,true);
+        else toast('Gagal menyimpan: '+m,true);
+      })
+      .then(function(){setBusy(false)});
+  });
+
+  load();
+})();
+</script>
+<script>
+/* Fallback transisi untuk browser tanpa dukungan View Transitions */
+(function(){
+  var h=document.documentElement;
+  if(!h.classList.contains('pt-fb'))return;
+  window.addEventListener('pageshow',function(e){if(e.persisted)h.classList.remove('pt-leave')});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href]');
+    if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    if(a.target&&a.target!=='_self')return;
+    var u=new URL(a.href,location.href);
+    if(u.origin!==location.origin||(u.pathname===location.pathname&&u.search===location.search))return;
+    if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    e.preventDefault();h.classList.add('pt-leave');
+    setTimeout(function(){location.href=a.href},220);
+  });
+})();
+</script>
+</body>
+</html>

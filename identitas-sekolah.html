@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Identitas Sekolah — Simpel-Pay</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --text:#1d1d1f;--muted:#6e6e73;--accent:#0a7aff;--red:#ff453a;
+  --glass:rgba(255,255,255,.72);--field:rgba(255,255,255,.9);--line:rgba(0,0,0,.1);--bar:rgba(255,255,255,.6);--track:rgba(120,120,128,.16);
+  --wall:linear-gradient(135deg,#9cbcff 0%,#c4b0fb 40%,#f9c4de 72%,#fde3bd 100%);
+  --shadow:0 14px 40px rgba(30,30,80,.2),0 0 0 .5px rgba(0,0,0,.14);
+}
+@media (prefers-color-scheme:dark){:root{--text:#f5f5f7;--muted:#a1a1a6;--accent:#2f8bff;--glass:rgba(40,40,46,.7);--field:rgba(70,70,78,.8);
+  --line:rgba(255,255,255,.14);--bar:rgba(20,20,26,.55);--track:rgba(255,255,255,.14);
+  --wall:linear-gradient(135deg,#1e2a5a 0%,#3b2a6e 40%,#6b2d5c 75%,#7a4a3a 100%);--shadow:0 14px 40px rgba(0,0,0,.5),0 0 0 .5px rgba(255,255,255,.14)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);color:var(--text);background:var(--wall) fixed;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+
+.nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:8px 20px;padding-top:calc(8px + env(safe-area-inset-top));
+  background:var(--bar);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:.5px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.sch-logo{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;overflow:hidden;background:linear-gradient(160deg,#4da3ff,#0a5fe0);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 6px rgba(0,0,0,.22)}
+.sch-logo svg{width:20px;height:20px}.sch-logo img{width:100%;height:100%;object-fit:contain}
+.sch-name{min-width:0;line-height:1.2}
+.sch-name b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-name small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp{flex:1}
+.acct{display:flex;align-items:center;gap:10px;padding:4px 6px 4px 12px;border-radius:99px;background:var(--track)}
+.acct div{text-align:right;line-height:1.2}.acct b{display:block;font-size:13px}.acct small{font-size:11px;color:var(--muted)}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(160deg,#4da3ff,#7c3aed)}
+
+.wrap{max-width:none;margin:0;padding:22px min(150px,12vw)}
+.head{margin-bottom:18px}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:4px}
+h1{font-size:clamp(26px,4.5vw,36px);letter-spacing:-.025em;line-height:1.1}
+.head p{color:var(--muted);font-size:14px;margin-top:4px}
+
+.panel{--text:#1d1d1f;--muted:#6e6e73;--field:rgba(255,255,255,.95);--line:rgba(0,0,0,.1);--track:rgba(120,120,128,.16);--accent:#0a7aff;--red:#ff453a;color:var(--text);
+  background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-radius:16px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ph .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.ph .ic svg{width:18px;height:18px}
+.ph h2{font-size:18px;letter-spacing:-.01em;line-height:1.2}
+.ph small{color:var(--muted);font-size:13px}
+
+.g{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
+.g .full{grid-column:1/-1}
+.g .third{grid-column:span 1}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+label i{color:var(--red);font-style:normal}
+.in{width:100%;font:inherit;font-size:15px;color:var(--text);padding:10px 12px;min-height:42px;border-radius:10px;border:0;background:var(--field);box-shadow:0 0 0 .5px var(--line),inset 0 1px 2px rgba(0,0,0,.06);transition:box-shadow .15s}
+.in::placeholder{color:#9a9aa0}
+.in:focus{outline:0;box-shadow:0 0 0 3px rgba(10,122,255,.4),0 0 0 1px var(--accent)}
+.in.bad{box-shadow:0 0 0 2px var(--red)}
+select.in{appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.err{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.bad+.err,.bad~.err{display:block}
+.pw{position:relative}.pw .in{padding-right:44px}
+.eye{position:absolute;right:4px;top:4px;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
+.eye:hover{background:var(--track)}.eye svg{width:18px;height:18px}
+
+.up{display:flex;align-items:center;gap:18px}
+.prev{width:96px;height:96px;flex:none;border-radius:22%;display:grid;place-items:center;overflow:hidden;color:var(--muted);background:var(--track);box-shadow:inset 0 0 0 1px var(--line)}
+.prev img{width:100%;height:100%;object-fit:contain;background:#fff}
+.prev svg{width:34px;height:34px}
+.upbtn{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font-size:14px;font-weight:600;padding:9px 16px;min-height:38px;border-radius:10px;background:var(--track);transition:background .15s,transform .15s}
+.btn:hover{background:rgba(120,120,128,.28)}.btn:active{transform:scale(.97)}
+.btn.blue{background:var(--accent);color:#fff}.btn.blue:hover{background:#0062d6}
+
+.dock{position:fixed!important;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;display:flex;justify-content:center;padding:0 12px;background:none;border:0;box-shadow:none;pointer-events:none;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform}
+.dock nav{--text:#1d1d1f;--track:rgba(120,120,128,.16);color:var(--text);width:auto;max-width:100%;display:flex;justify-content:center;gap:6px;padding:8px 12px;pointer-events:auto;
+  background:rgba(255,255,255,.45);backdrop-filter:saturate(180%) blur(28px);-webkit-backdrop-filter:saturate(180%) blur(28px);
+  border:.5px solid rgba(255,255,255,.55);border-radius:32px;box-shadow:0 10px 30px rgba(30,30,80,.22),inset 0 1px 0 rgba(255,255,255,.5)}
+@media (prefers-color-scheme:dark){.dock nav{--text:#f5f5f7;--track:rgba(255,255,255,.14);background:rgba(40,40,46,.5);border-color:rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}}
+html,body{overflow-x:hidden}
+.d{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:92px;padding:8px 14px;border-radius:16px;font-size:12px;font-weight:600;transition:background .15s,transform .15s}
+.d:hover{background:var(--track);transform:translateY(-3px)}
+.d:disabled{opacity:.55;cursor:progress;transform:none}
+.d .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35)}
+.d .ic svg{width:21px;height:21px}
+
+.toast{position:fixed;top:calc(52px + env(safe-area-inset-top));right:14px;z-index:60;max-width:min(340px,calc(100% - 28px));display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--glass);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:var(--shadow);font-size:14px;transform:translateY(-20px);opacity:0;pointer-events:none;transition:.3s cubic-bezier(.2,.85,.25,1)}
+.toast.show{transform:none;opacity:1}
+.toast .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none;background:#28c840}
+.toast.er .ic{background:var(--red)}
+.toast svg{width:16px;height:16px}
+
+@media (max-width:640px){.g{grid-template-columns:1fr}.g .full{grid-column:auto}.acct div,.sch-name small{display:none}.acct{padding:3px}.wrap{padding:16px 5px}.nav{padding-left:5px;padding-right:5px}.panel{padding:16px}.up{flex-direction:column;align-items:flex-start}.d{min-width:84px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Transisi antar halaman */
+@view-transition{navigation:auto}
+.nav,.menubar{view-transition-name:pt-nav}
+.dock{view-transition-name:pt-dock}
+@keyframes pt-out{to{opacity:0;transform:translateY(-8px) scale(.995)}}
+@keyframes pt-in{from{opacity:0;transform:translateY(12px) scale(.997)}}
+::view-transition-group(*){animation-duration:.35s}
+::view-transition-old(root){animation:.2s cubic-bezier(.4,0,1,1) both pt-out}
+::view-transition-new(root){animation:.4s cubic-bezier(.2,.8,.2,1) both pt-in}
+.pt-fb .wrap{animation:pt-in .4s cubic-bezier(.2,.8,.2,1) both}
+.pt-fb.pt-leave .wrap,.pt-fb.pt-leave .dock{opacity:0;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease}
+@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(root),::view-transition-new(root),.pt-fb .wrap{animation:none!important}}
+</style>
+<script>if(!('PageSwapEvent' in window))document.documentElement.classList.add('pt-fb');</script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">
+    <span class="sch-logo" id="navLogo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5"/></svg></span>
+    <span class="sch-name"><b id="navName">SMP Negeri 1 Contoh</b><small id="navSub">Kab. Contoh, Prov. Contoh</small></span>
+  </div>
+  <span class="sp"></span>
+  <div class="acct"><div><b>Budi Santoso</b><small>Admin Utama</small></div><span class="avatar">BS</span></div>
+</header>
+
+<main class="wrap">
+  <div class="head">
+    <p class="crumb">Menu Sistem › Identitas Sekolah</p>
+    <h1>Identitas Sekolah</h1>
+    <p>Lengkapi data sekolah. Kolom bertanda <span style="color:var(--red)">*</span> wajib diisi.</p>
+  </div>
+
+  <form id="f" novalidate autocomplete="off">
+
+    <section class="panel">
+      <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#4da3ff,#0a5fe0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v9h14v-9M9 19v-5h6v5"/></svg></span><div><h2>Data Sekolah</h2></div></div>
+      <div class="g">
+        <div class="full"><label for="nama">Nama Sekolah <i>*</i></label><input class="in" id="nama" name="nama" required placeholder="Contoh: SMP Negeri 1 Contoh"><p class="err">Nama sekolah wajib diisi.</p></div>
+        <div><label for="npsn">NPSN <i>*</i></label><input class="in" id="npsn" name="npsn" required inputmode="numeric" maxlength="8" placeholder="8 digit angka"><p class="err">NPSN harus 8 digit angka.</p></div>
+        <div><label for="status">Status <i>*</i></label>
+          <select class="in" id="status" name="status" required><option value="">Pilih status</option><option>Negeri</option><option>Swasta</option></select><p class="err">Pilih status sekolah.</p></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#ff7a8a,#e11d48)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></span><div><h2>Alamat</h2></div></div>
+      <div class="g">
+        <div class="full"><label for="jalan">Jalan <i>*</i></label><input class="in" id="jalan" name="jalan" required placeholder="Nama jalan dan nomor"><p class="err">Jalan wajib diisi.</p></div>
+        <div><label for="kelurahan">Kelurahan <i>*</i></label><input class="in" id="kelurahan" name="kelurahan" required placeholder="Nama kelurahan"><p class="err">Kelurahan wajib diisi.</p></div>
+        <div><label for="kecamatan">Kecamatan <i>*</i></label><input class="in" id="kecamatan" name="kecamatan" required placeholder="Nama kecamatan"><p class="err">Kecamatan wajib diisi.</p></div>
+        <div><label for="kabupaten">Kabupaten/Kota <i>*</i></label><input class="in" id="kabupaten" name="kabupaten" required placeholder="Nama kabupaten/kota"><p class="err">Kabupaten wajib diisi.</p></div>
+        <div><label for="provinsi">Provinsi <i>*</i></label><input class="in" id="provinsi" name="provinsi" required placeholder="Nama provinsi"><p class="err">Provinsi wajib diisi.</p></div>
+        <div><label for="pos">Kode Pos <i>*</i></label><input class="in" id="pos" name="pos" required inputmode="numeric" maxlength="5" placeholder="5 digit angka"><p class="err">Kode pos harus 5 digit angka.</p></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#c084fc,#7c3aed)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><div><h2>Kepala Sekolah &amp; Kontak</h2></div></div>
+      <div class="g">
+        <div><label for="kepsek">Nama Kepala Sekolah <i>*</i></label><input class="in" id="kepsek" name="kepsek" required placeholder="Nama lengkap beserta gelar"><p class="err">Nama kepala sekolah wajib diisi.</p></div>
+        <div><label for="nip">NIP <i>*</i></label><input class="in" id="nip" name="nip" required inputmode="numeric" maxlength="18" placeholder="18 digit angka"><p class="err">NIP harus 18 digit angka.</p></div>
+        <div><label for="email">Email <i>*</i></label><input class="in" id="email" name="email" type="email" required placeholder="nama@sekolah.sch.id"><p class="err">Format email tidak valid.</p></div>
+        <div><label for="telp">Telepon <i>*</i></label><input class="in" id="telp" name="telp" type="tel" required inputmode="tel" placeholder="08xxxxxxxxxx"><p class="err">Nomor telepon tidak valid.</p></div>
+        <div class="full"><label for="npwp">NPWP <i>*</i></label><input class="in" id="npwp" name="npwp" required inputmode="numeric" maxlength="20" placeholder="15–16 digit angka"><p class="err">NPWP harus 15 atau 16 digit angka.</p></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#ffb454,#f0780a)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div><h2>Akun Login</h2></div></div>
+      <div class="g">
+        <div><label for="user">Username <i>*</i></label><input class="in" id="user" name="user" required autocapitalize="none" placeholder="Minimal 4 karakter"><p class="err">Username minimal 4 karakter.</p></div>
+        <div><label for="pass">Password <i>*</i></label>
+          <div class="pw"><input class="in" id="pass" name="pass" type="password" autocomplete="new-password" placeholder="Minimal 6 karakter"><button class="eye" id="eye" type="button" aria-label="Tampilkan password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+          <p class="err">Password minimal 6 karakter.</p></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ph"><span class="ic" style="background:linear-gradient(160deg,#5be37a,#1fa23c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg></span><div><h2>Logo Sekolah</h2><small>Format PNG, JPG, atau WebP. Maksimal 2 MB.</small></div></div>
+      <div class="up">
+        <div class="prev" id="prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg></div>
+        <div>
+          <div class="upbtn">
+            <button class="btn blue" id="pick" type="button">Pilih File…</button>
+            <button class="btn" id="rm" type="button" hidden>Hapus</button>
+          </div>
+          <p class="hint" id="fname">Belum ada file dipilih.</p>
+        </div>
+        <input id="logo" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+      </div>
+    </section>
+  </form>
+</main>
+
+<div class="dock">
+  <nav aria-label="Aksi halaman">
+    <a class="d" href="adminutama.html"><span class="ic" style="background:linear-gradient(160deg,#4da3ff,#0a5fe0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6"/></svg></span>Beranda</a>
+    <button class="d" id="saveBtn" type="submit" form="f"><span class="ic" style="background:linear-gradient(160deg,#5be37a,#1fa23c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5zM8 3v5h7M8 21v-7h8v7"/></svg></span><span id="saveLbl">Simpan</span></button>
+  </nav>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="tIc"><path d="M5 12l5 5 9-10"/></svg></span><span id="tMsg"></span></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  /* ===== Koneksi Supabase (anon public key memang dirancang untuk dipakai di sisi klien) ===== */
+  var SB_URL=window.SIMPELPAY_CONFIG.SUPABASE_URL;
+  var SB_KEY=window.SIMPELPAY_CONFIG.SUPABASE_ANON_KEY;
+  var BUCKET='aset',TABLE='identitas_sekolah';
+  var AUTH={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
+  function hdr(x){var h={},k;for(k in AUTH)h[k]=AUTH[k];for(k in (x||{}))h[k]=x[k];return h}
+  function fail(r){return r.text().then(function(t){var m=t;try{var j=JSON.parse(t);m=j.message||j.error||t}catch(e){}throw new Error(m||('HTTP '+r.status))})}
+
+  /* Kolom form -> kolom tabel */
+  var map={nama:'nama_sekolah',npsn:'npsn',status:'status',jalan:'jalan',kelurahan:'kelurahan',kecamatan:'kecamatan',kabupaten:'kabupaten',provinsi:'provinsi',pos:'kode_pos',kepsek:'nama_kepsek',nip:'nip',email:'email',telp:'telepon',npwp:'npwp',user:'username'};
+  var optional={};
+
+  var f=document.getElementById('f'),saved=null,logoFile=null,logoRemoved=false,logoPath=null,logoUrl=null;
+  function el(i){return document.getElementById(i)}
+
+  var rules={
+    nama:function(v){return v.trim().length>0},
+    npsn:function(v){return /^\d{8}$/.test(v)},
+    status:function(v){return v!==''},
+    jalan:function(v){return v.trim()!==''},
+    kelurahan:function(v){return v.trim()!==''},
+    kecamatan:function(v){return v.trim()!==''},
+    kabupaten:function(v){return v.trim()!==''},
+    provinsi:function(v){return v.trim()!==''},
+    pos:function(v){return /^\d{5}$/.test(v)},
+    kepsek:function(v){return v.trim()!==''},
+    nip:function(v){return /^\d{18}$/.test(v)},
+    email:function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},
+    telp:function(v){return /^(\+62|0)\d{8,13}$/.test(v.replace(/[\s-]/g,''))},
+    npwp:function(v){return /^\d{15,16}$/.test(v.replace(/[.\-\s]/g,''))},
+    user:function(v){return v.trim().length>=4},
+    pass:function(v){return v===''?!!(saved&&saved.password_hash):v.length>=6}
+  };
+  var ids=Object.keys(rules);
+  function check(i){var ok=rules[i](el(i).value);el(i).classList.toggle('bad',!ok);return ok}
+  ids.forEach(function(i){el(i).addEventListener('blur',function(){check(i)});el(i).addEventListener('input',function(){if(el(i).classList.contains('bad'))check(i)})});
+  ['npsn','pos','nip'].forEach(function(i){el(i).addEventListener('input',function(){el(i).value=el(i).value.replace(/\D/g,'')})});
+
+  var tm;function toast(m,err){el('tMsg').textContent=m;var t=el('toast');t.classList.toggle('er',!!err);
+    el('tIc').innerHTML=err?'<path d="M12 6v8M12 18h.01"/>':'<path d="M5 12l5 5 9-10"/>';t.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('show')},3800)}
+
+  el('eye').addEventListener('click',function(){var p=el('pass'),s=p.type==='password';p.type=s?'text':'password';this.setAttribute('aria-label',s?'Sembunyikan password':'Tampilkan password')});
+
+  /* ===== Logo ===== */
+  el('prev').dataset.empty=el('prev').innerHTML;el('navLogo').dataset.empty=el('navLogo').innerHTML;
+  function showLogo(src,name){
+    el('prev').innerHTML=src?'<img alt="Pratinjau logo" src="'+src+'">':el('prev').dataset.empty;
+    el('rm').hidden=!src;el('fname').textContent=src?(name||'Logo tersimpan'):'Belum ada file dipilih.';
+    var nl=el('navLogo');nl.innerHTML=src?'<img alt="" src="'+src+'">':nl.dataset.empty;
+  }
+  el('pick').addEventListener('click',function(){el('logo').click()});
+  el('rm').addEventListener('click',function(){logoFile=null;logoRemoved=true;el('logo').value='';showLogo('')});
+  el('logo').addEventListener('change',function(){
+    var fl=this.files[0];if(!fl)return;
+    if(!/^image\/(png|jpeg|webp)$/.test(fl.type)){toast('Format file harus PNG, JPG, atau WebP.',true);this.value='';return}
+    if(fl.size>2*1024*1024){toast('Ukuran file maksimal 2 MB.',true);this.value='';return}
+    logoFile=fl;logoRemoved=false;
+    var r=new FileReader();r.onload=function(){showLogo(r.result,fl.name)};r.readAsDataURL(fl);
+  });
+  function removeObject(path){
+    if(!path)return Promise.resolve();
+    return fetch(SB_URL+'/storage/v1/object/'+BUCKET+'/'+path,{method:'DELETE',headers:hdr()}).catch(function(){});
+  }
+  function uploadLogo(file){
+    var ext={'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[file.type];
+    var path='logo/logo-sekolah.'+ext;
+    return fetch(SB_URL+'/storage/v1/object/'+BUCKET+'/'+path,{method:'POST',headers:hdr({'Content-Type':file.type,'x-upsert':'true'}),body:file})
+      .then(function(r){return r.ok?path:fail(r)});
+  }
+
+  /* ===== Hash password (PBKDF2-SHA256 + salt) ===== */
+  function b64(buf){var s='',a=new Uint8Array(buf);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)}
+  function hashPw(pw){
+    if(!(window.crypto&&crypto.subtle))return Promise.reject(new Error('Browser tidak mendukung enkripsi (butuh HTTPS atau localhost).'));
+    var salt=crypto.getRandomValues(new Uint8Array(16)),it=100000,enc=new TextEncoder();
+    return crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits'])
+      .then(function(k){return crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:it,hash:'SHA-256'},k,256)})
+      .then(function(bits){return 'pbkdf2$'+it+'$'+b64(salt)+'$'+b64(bits)});
+  }
+
+  /* ===== Muat data dari Supabase ===== */
+  function syncNav(){
+    if(el('nama').value)el('navName').textContent=el('nama').value;
+    var s=[el('kabupaten').value,el('provinsi').value].filter(Boolean).join(', ');if(s)el('navSub').textContent=s;
+  }
+  function fill(row){
+    saved=row;
+    Object.keys(map).forEach(function(i){el(i).value=row[map[i]]==null?'':row[map[i]]});
+    logoPath=row.logo_path||null;logoUrl=row.logo_url||null;
+    if(logoUrl)showLogo(logoUrl+'?v='+encodeURIComponent(row.updated_at||''));
+    el('pass').placeholder='Kosongkan jika tidak diubah';
+    syncNav();
+  }
+  fetch(SB_URL+'/rest/v1/'+TABLE+'?id=eq.1&select=*',{headers:hdr()})
+    .then(function(r){return r.ok?r.json():fail(r)})
+    .then(function(rows){if(rows&&rows[0])fill(rows[0])})
+    .catch(function(e){toast('Gagal memuat data: '+e.message,true)});
+
+  /* ===== Simpan: tambah jika belum ada, perbarui jika sudah ada ===== */
+  var busy=false;
+  function setBusy(b){busy=b;el('saveBtn').disabled=b;el('saveLbl').textContent=b?'Menyimpan…':'Simpan'}
+  f.addEventListener('submit',function(e){
+    e.preventDefault();if(busy)return;
+    var first=null;
+    ids.forEach(function(i){if(!check(i)&&!first)first=i});
+    if(first){el(first).focus();toast('Periksa kembali kolom yang berwarna merah.',true);return}
+
+    var isNew=!saved,newLogoPath=logoPath,newLogoUrl=logoUrl,oldPath=logoPath;
+    setBusy(true);
+
+    var step=Promise.resolve();
+    if(logoFile){
+      step=uploadLogo(logoFile).then(function(p){
+        newLogoPath=p;newLogoUrl=SB_URL+'/storage/v1/object/public/'+BUCKET+'/'+p;
+        if(oldPath&&oldPath!==p)return removeObject(oldPath);
+      });
+    }else if(logoRemoved){
+      step=removeObject(oldPath).then(function(){newLogoPath=null;newLogoUrl=null});
+    }
+
+    step.then(function(){
+      var d={id:1};
+      Object.keys(map).forEach(function(i){var v=el(i).value.trim();d[map[i]]=(v===''&&optional[i])?null:v});
+      d.logo_path=newLogoPath;d.logo_url=newLogoUrl;
+      var pw=el('pass').value;
+      return (pw?hashPw(pw):Promise.resolve(null)).then(function(h){
+        if(h)d.password_hash=h;
+        return fetch(SB_URL+'/rest/v1/'+TABLE+'?on_conflict=id',{method:'POST',
+          headers:hdr({'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify(d)});
+      });
+    })
+    .then(function(r){return r.ok?r.json():fail(r)})
+    .then(function(rows){
+      fill(rows[0]);logoFile=null;logoRemoved=false;el('logo').value='';el('pass').value='';
+      toast(isNew?'Data identitas sekolah berhasil ditambahkan.':'Data identitas sekolah berhasil diperbarui.');
+    })
+    .catch(function(err){toast('Gagal menyimpan: '+err.message,true)})
+    .then(function(){setBusy(false)});
+  });
+})();
+</script>
+<script>
+/* Fallback transisi untuk browser tanpa dukungan View Transitions */
+(function(){
+  var h=document.documentElement;
+  if(!h.classList.contains('pt-fb'))return;
+  window.addEventListener('pageshow',function(e){if(e.persisted)h.classList.remove('pt-leave')});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href]');
+    if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    if(a.target&&a.target!=='_self')return;
+    var u=new URL(a.href,location.href);
+    if(u.origin!==location.origin||(u.pathname===location.pathname&&u.search===location.search))return;
+    if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    e.preventDefault();h.classList.add('pt-leave');
+    setTimeout(function(){location.href=a.href},220);
+  });
+})();
+</script>
+</body>
+</html>

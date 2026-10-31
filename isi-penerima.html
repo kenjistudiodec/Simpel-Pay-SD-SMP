@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Isi Data Penerima Pembayaran</title>
+<style>
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --text:#1d1d1f;--muted:#6e6e73;--accent:#0a7aff;--red:#ff453a;--green:#1fa23c;
+  --card:rgba(255,255,255,.82);--field:rgba(255,255,255,.95);--line:rgba(0,0,0,.1);--track:rgba(120,120,128,.16);
+  --wall:linear-gradient(135deg,#9cbcff 0%,#c4b0fb 40%,#f9c4de 72%,#fde3bd 100%);
+  --shadow:0 14px 40px rgba(30,30,80,.2),0 0 0 .5px rgba(0,0,0,.14);
+}
+@media (prefers-color-scheme:dark){:root{--text:#f5f5f7;--muted:#a1a1a6;--accent:#2f8bff;--card:rgba(40,40,46,.78);--field:rgba(70,70,78,.8);--line:rgba(255,255,255,.14);--track:rgba(255,255,255,.14);
+  --wall:linear-gradient(135deg,#1e2a5a 0%,#3b2a6e 40%,#6b2d5c 75%,#7a4a3a 100%);--shadow:0 14px 40px rgba(0,0,0,.5),0 0 0 .5px rgba(255,255,255,.14)}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{font-family:var(--font);color:var(--text);background:var(--wall) fixed;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;
+  padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+.wrap{max-width:520px;margin:0 auto}
+.card{background:var(--card);backdrop-filter:saturate(180%) blur(30px);-webkit-backdrop-filter:saturate(180%) blur(30px);border-radius:18px;box-shadow:var(--shadow);padding:24px}
+h1{font-size:22px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:4px 0 20px}
+.fg{display:grid;gap:16px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+label i{color:var(--red);font-style:normal}
+.in{width:100%;font:inherit;font-size:16px;color:var(--text);padding:10px 12px;min-height:44px;border-radius:10px;border:0;background:var(--field);box-shadow:0 0 0 .5px var(--line),inset 0 1px 2px rgba(0,0,0,.05)}
+.in::placeholder{color:#9a9aa0}
+.in:focus{outline:0;box-shadow:0 0 0 3px rgba(10,122,255,.4),0 0 0 1px var(--accent)}
+.in.bad{box-shadow:0 0 0 2px var(--red)}
+textarea.in{resize:vertical;min-height:84px;line-height:1.45}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.err{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.in.bad ~ .err{display:block}
+.btn{width:100%;font-size:16px;font-weight:600;padding:12px 18px;min-height:46px;border-radius:12px;background:var(--accent);color:#fff;margin-top:22px;transition:background .15s,transform .15s}
+.btn:hover{background:#0062d6}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.6;cursor:progress}
+.btn.ghost{background:var(--track);color:var(--text)}.btn.ghost:hover{background:rgba(120,120,128,.28)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.msg{display:none;margin-top:16px;padding:10px 12px;border-radius:10px;font-size:14px;background:rgba(255,69,58,.12);color:var(--red)}
+.done{display:none;text-align:center;padding:12px 0}
+.done .ok{width:64px;height:64px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;background:var(--green);color:#fff}
+.done .ok svg{width:34px;height:34px}
+.done h2{font-size:20px;margin-bottom:6px}.done p{color:var(--muted);font-size:14px}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:14px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <!-- Formulir -->
+    <form id="f" novalidate autocomplete="off">
+      <h1>Data Penerima Pembayaran</h1>
+      <p class="sub" id="sch">Silakan isi data Anda dengan benar dan lengkap.</p>
+      <div class="fg">
+        <div><label for="fnama">Nama Penerima <i>*</i></label><input class="in" id="fnama" maxlength="100" placeholder="Contoh: Joshua"><p class="err">Nama penerima wajib diisi.</p></div>
+        <div><label for="fusaha">Nama Usaha/Toko</label><input class="in" id="fusaha" maxlength="100" placeholder="Contoh: Sinar Mulia"><p class="hint">Opsional. Jika dikosongkan otomatis terisi “-”.</p></div>
+        <div><label for="fnpwp">NPWP</label><input class="in" id="fnpwp" inputmode="text" maxlength="25" placeholder="Contoh: 12.345.678.9-012.000"><p class="hint">Opsional. Jika dikosongkan otomatis terisi “-”. Jika diisi: 15 atau 16 digit angka (boleh spasi, titik, strip).</p><p class="err">NPWP harus 15 atau 16 digit angka (spasi, titik, dan strip diperbolehkan).</p></div>
+        <div><label for="falamat">Alamat <i>*</i></label><textarea class="in" id="falamat" rows="3" placeholder="Alamat lengkap penerima / usaha"></textarea><p class="err">Alamat wajib diisi.</p></div>
+        <div><label for="ftelp">Telepon/WA <i>*</i></label><input class="in" id="ftelp" inputmode="tel" maxlength="16" placeholder="Contoh: 081234567890"><p class="err">Nomor telepon/WA harus 8–15 digit angka (boleh diawali +).</p></div>
+        <div><label for="frek">Nomor Rekening</label><input class="in" id="frek" inputmode="numeric" maxlength="20" placeholder="Contoh: 1234567890"><p class="hint">Opsional. Jika dikosongkan otomatis terisi “-”.</p><p class="err">Nomor rekening harus 6–20 digit angka.</p></div>
+        <div class="hp" aria-hidden="true"><label for="fweb">Website</label><input id="fweb" tabindex="-1" autocomplete="off"></div>
+      </div>
+      <div class="msg" id="msg" role="alert"></div>
+      <button class="btn" type="submit" id="saveBtn">Kirim Data</button>
+    </form>
+
+    <!-- Tampilan sukses -->
+    <div class="done" id="done" role="status" aria-live="polite">
+      <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div>
+      <h2>Data berhasil dikirim</h2>
+      <p>Terima kasih. Data Anda sudah tersimpan.</p>
+      <button class="btn ghost" type="button" id="againBtn">Isi data lain</button>
+    </div>
+  </section>
+  <p class="foot">Simpel-Pay</p>
+</main>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  var SB_URL=window.SIMPELPAY_CONFIG.SUPABASE_URL;
+  var SB_KEY=window.SIMPELPAY_CONFIG.SUPABASE_ANON_KEY;
+  var TABLE='penerima_pembayaran';
+  function el(i){return document.getElementById(i)}
+  function hdr(x){var h={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};for(var k in x)h[k]=x[k];return h}
+
+  /* Nama sekolah (opsional, hanya tampilan) */
+  fetch(SB_URL+'/rest/v1/identitas_sekolah?select=nama_sekolah&id=eq.1',{headers:hdr()})
+    .then(function(r){return r.ok?r.json():[]})
+    .then(function(a){if(a&&a[0]&&a[0].nama_sekolah)el('sch').textContent='Silakan isi data Anda untuk '+a[0].nama_sekolah+'.'})
+    .catch(function(){});
+
+  /* Validasi (sama dengan halaman di aplikasi) */
+  var ids=['fnama','fnpwp','falamat','ftelp','frek'];
+  var rules={
+    fnama:function(v){return v.trim().length>0},
+    fnpwp:function(v){v=v.trim();return v===''||v==='-'||/^\d{15,16}$/.test(v.replace(/[\s.-]/g,''))},
+    falamat:function(v){return v.trim().length>0},
+    ftelp:function(v){return /^\+?\d{8,15}$/.test(v.replace(/[\s-]/g,''))},
+    frek:function(v){v=v.trim();return v===''||/^\d{6,20}$/.test(v)}
+  };
+  function check(i){var ok=rules[i](el(i).value);el(i).classList.toggle('bad',!ok);return ok}
+  ids.forEach(function(i){
+    el(i).addEventListener('blur',function(){check(i)});
+    el(i).addEventListener('input',function(){if(el(i).classList.contains('bad'))check(i)});
+  });
+  el('fnpwp').addEventListener('input',function(){this.value=this.value.replace(/[^\d.\s-]/g,'')});
+  el('frek').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'')});
+  el('ftelp').addEventListener('input',function(){this.value=this.value.replace(/[^\d+\s-]/g,'')});
+
+  var busy=false;
+  function setBusy(b){busy=b;el('saveBtn').disabled=b;el('saveBtn').textContent=b?'Mengirim…':'Kirim Data'}
+  function showMsg(t){var m=el('msg');m.textContent=t;m.style.display=t?'block':'none'}
+  function showDone(){el('f').style.display='none';el('done').style.display='block';window.scrollTo(0,0)}
+
+  el('f').addEventListener('submit',function(e){
+    e.preventDefault();if(busy)return;showMsg('');
+    var first=null;ids.forEach(function(i){if(!check(i)&&!first)first=i});
+    if(first){el(first).focus();return}
+    if(el('fweb').value){showDone();return} /* jebakan bot: pura-pura sukses */
+    var d={
+      nama_penerima:el('fnama').value.trim(),
+      nama_usaha:el('fusaha').value.trim()||'-',
+      npwp:el('fnpwp').value.trim()||'-',
+      alamat:el('falamat').value.trim(),
+      telepon:el('ftelp').value.replace(/[\s-]/g,''),
+      no_rekening:el('frek').value.trim()||'-'
+    };
+    setBusy(true);
+    fetch(SB_URL+'/rest/v1/'+TABLE,{method:'POST',headers:hdr({'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(d)})
+      .then(function(r){
+        if(r.ok){showDone();return}
+        return r.json().catch(function(){return {}}).then(function(j){throw new Error(j.message||('Kode '+r.status))});
+      })
+      .catch(function(err){showMsg('Data belum terkirim: '+err.message+'. Silakan coba lagi.')})
+      .then(function(){setBusy(false)});
+  });
+
+  el('againBtn').addEventListener('click',function(){
+    el('f').reset();ids.forEach(function(i){el(i).classList.remove('bad')});
+    el('done').style.display='none';el('f').style.display='block';el('fnama').focus();
+  });
+})();
+</script>
+</body>
+</html>
