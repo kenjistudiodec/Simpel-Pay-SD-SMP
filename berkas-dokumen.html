@@ -336,6 +336,18 @@ table.dt{min-width:880px}
 @keyframes wShake{0%,100%{transform:none}20%{transform:rotate(-11deg)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
 @keyframes wPulse{from{opacity:1;transform:scale(.92)}to{opacity:0;transform:scale(1.4)}}
 @keyframes wmGrow{from{width:0}}
+/* Modal pratinjau berkas */
+.vw{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,0);visibility:hidden;pointer-events:none;transition:background .25s,visibility 0s linear .25s}
+.vw.open{background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);visibility:visible;pointer-events:auto;transition:background .25s,visibility 0s}
+.vw-card{--text:#1d1d1f;--muted:#6e6e73;--track:rgba(120,120,128,.16);color:var(--text);display:flex;flex-direction:column;width:min(980px,100%);height:min(90vh,100%);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.98);box-shadow:0 24px 60px rgba(0,0,0,.4),0 0 0 .5px rgba(0,0,0,.14)}
+.vw.open .vw-card{animation:wIn .3s cubic-bezier(.2,.9,.25,1.2)}
+.vw-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-bottom:.5px solid rgba(0,0,0,.12)}
+.vw-top b{flex:1;min-width:120px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vw-body{position:relative;flex:1;min-height:0;display:grid;place-items:center;background:#e9e9ee;overflow:auto}
+.vw-body::before{content:"Memuat\2026";position:absolute;font-size:13px;color:var(--muted)}
+.vw-body iframe{position:relative;width:100%;height:100%;border:0;background:transparent}
+.vw-body img{position:relative;max-width:100%;max-height:100%;object-fit:contain}
+@media (prefers-reduced-motion:reduce){.vw.open .vw-card{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.warn.open .warn-card,.warn.open .warn-ic,.warn.open .warn-ic::after,.wm-bar i{animation:none!important}}
 </style>
 <script>if(!('PageSwapEvent' in window))document.documentElement.classList.add('pt-fb');</script>
@@ -406,6 +418,13 @@ table.dt{min-width:880px}
     <div class="warn-err" id="wErr" role="alert" hidden></div>
     <button type="button" class="warn-btn" id="wZip" hidden>Kompres ke 50 KB &amp; simpan</button>
     <button type="button" class="warn-btn" id="wOk">Mengerti</button>
+  </div>
+</div>
+
+<div class="vw" id="vw" role="dialog" aria-modal="true" aria-labelledby="vwT">
+  <div class="vw-card">
+    <div class="vw-top"><b id="vwT">Pratinjau Berkas</b><a class="lihat" id="vwTab" href="#" target="_blank" rel="noopener">Buka di Tab Baru</a><button type="button" class="lihat alt" id="vwX">Tutup</button></div>
+    <div class="vw-body" id="vwBody"></div>
   </div>
 </div>
 
@@ -573,11 +592,11 @@ table.dt{min-width:880px}
   function delBtn(o){return o.file_url?'<button class="lihat del" type="button" data-del="'+o.id+'" title="Hapus berkas dari penyimpanan">Hapus</button>':''}
   function aksi(o){
     var up='<button class="lihat'+(o.file_url?' alt':'')+'" type="button" aria-haspopup="menu" aria-expanded="false" data-up="'+o.id+'">'+(o.file_url?'Ganti':'Upload')+'</button>';
-    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener" title="'+esc(o.file_nama||'')+'">Lihat PDF</a>':'')+up+delBtn(o)+'</div>';
+    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" data-lihat="1" href="'+esc(o.file_url)+'" target="_blank" rel="noopener" title="'+esc(o.file_nama||'')+'">Lihat PDF</a>':'')+up+delBtn(o)+'</div>';
   }
   function aksiFoto(o){
     var up='<button class="lihat'+(o.file_url?' alt':'')+'" type="button" aria-haspopup="menu" aria-expanded="false" data-up="'+o.id+'">'+(o.file_url?'Ganti':'Upload')+'</button>';
-    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener">Lihat</a>':'')+up+delBtn(o)+'</div>';
+    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" data-lihat="1" href="'+esc(o.file_url)+'" target="_blank" rel="noopener" title="'+esc(o.file_nama||'')+'">Lihat</a>':'')+up+delBtn(o)+'</div>';
   }
   var tm;function toast(m){var t=$('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('show')},4200)}
   var upId=null,upBusy=false,MAXB=50*1024,FOLDER='berkas-dokumen/',DIMS=[1000,800,640,520,420,340,280,220,180],QS=[.6,.45,.3,.2,.12]; /* batas 50 KB; semua file disimpan di bucket aset/berkas-dokumen/ */
@@ -609,6 +628,25 @@ table.dt{min-width:880px}
   $('wOk').addEventListener('click',warnClose);
   wEl.addEventListener('click',function(e){if(e.target===wEl)warnClose()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&wEl.classList.contains('open'))warnClose()});
+  /* Pratinjau berkas: klik Lihat -> modal; "Buka di Tab Baru" bila perlu lebih besar */
+  var vw=$('vw'),vwBack=null;
+  function vwOpen(url,nm){
+    var el,body=$('vwBody');
+    $('vwT').textContent=nm||'Pratinjau Berkas';$('vwTab').href=url;
+    if(/\.(jpe?g|png|webp|gif)(\?|#|$)/i.test(url)){el=document.createElement('img');el.alt=nm||'';el.src=url}
+    else{el=document.createElement('iframe');el.title=nm||'Pratinjau berkas';el.src=url+(url.indexOf('#')<0?'#view=FitH':'')}
+    body.innerHTML='';body.appendChild(el);
+    vwBack=document.activeElement;vw.classList.add('open');$('vwTab').focus();
+  }
+  function vwClose(){vw.classList.remove('open');$('vwBody').innerHTML='';if(vwBack&&vwBack.focus){try{vwBack.focus()}catch(e){}}vwBack=null}
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[data-lihat]');
+    if(!a||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;   /* Ctrl/Cmd+klik tetap buka tab baru */
+    e.preventDefault();vwOpen(a.href,a.title);
+  });
+  $('vwX').addEventListener('click',vwClose);
+  vw.addEventListener('click',function(e){if(e.target===vw)vwClose()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&vw.classList.contains('open'))vwClose()});
   $('wZip').addEventListener('click',function(){
     var f=wPend;if(!f||zipBusy)return;
     zipBusy=true;setZip(true);$('wErr').hidden=true;
