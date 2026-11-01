@@ -1283,11 +1283,20 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       +'<div class="pd-b"><div>Menyetujui</div><div class="pd-sg"><div>Kepala Sekolah<br>Penguasa Pengguna Anggaran</div><div>Bendahara Pengeluaran<br>Pengguna Anggaran</div></div>'
       +'<div class="pd-sp"></div><div class="pd-sg"><div>'+esc(r.nama_kepsek||'')+'<br>NIP. '+esc(r.nip_kepsek||'')+'</div><div>'+esc(r.nama_bendahara||'')+'<br>NIP. '+esc(r.nip_bendahara||'')+'</div></div></div>';
   }
+  /* Nama file saat "Simpan sebagai PDF" mengikuti judul halaman: "<Dokumen>-<Nomor BKU>", mis. Kwitansi-BKU001 */
+  var TITLE0=document.title;
+  window.printAs=function(doc,row){
+    var n=String((row&&row.nomor_bukti)||'').replace(/[\\\/:*?"<>|]+/g,'').replace(/\s+/g,'');
+    document.title=n?doc+'-'+n:doc;
+    /* jeda singkat: Chrome perlu menerima judul baru dulu, kalau tidak nama file tetap kosong/lama */
+    setTimeout(function(){window.print()},400);
+  };
+  window.addEventListener('afterprint',function(){document.title=TITLE0});
   $('sdPrint').addEventListener('click',function(){
     if(!sdRow)return;
     $('pdPaper').innerHTML=buildSppdDoc(sdRow);
     var w=[].map.call($('pdPaper').querySelectorAll('img'),function(im){return im.complete?1:new Promise(function(ok){im.onload=im.onerror=ok})});
-    Promise.race([Promise.all(w),new Promise(function(ok){setTimeout(ok,2000)})]).then(function(){document.body.classList.add('pd');window.print()});
+    Promise.race([Promise.all(w),new Promise(function(ok){setTimeout(ok,2000)})]).then(function(){document.body.classList.add('pd');printAs('SPPD',sdRow)});
   });
   window.addEventListener('afterprint',function(){document.body.classList.remove('pd')});
   $('sdEdit').addEventListener('click',function(){if(sdRow)openSppd(this,sdRow)});
@@ -1824,7 +1833,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       })
       .then(function(){
         srBusy=false;b.disabled=false;b.textContent='Cetak';
-        document.body.classList.add('ps');window.print();
+        document.body.classList.add('ps');printAs('Surat-Order',srRow);
       });
   });
   window.addEventListener('afterprint',function(){document.body.classList.remove('ps')});
@@ -1937,7 +1946,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       .then(function(){
         kwBusy=false;b.disabled=false;b.textContent='Cetak';
         kwSt=document.createElement('style');kwSt.textContent='@page{size:A4 landscape;margin:10mm}';document.head.appendChild(kwSt);
-        document.body.classList.add('pk');window.print();
+        document.body.classList.add('pk');printAs('Kwitansi',kwRow);
       });
   });
   window.addEventListener('afterprint',endKwPrint);
@@ -2008,7 +2017,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       .then(function(){
         ntBusy=false;b.disabled=false;b.textContent='Cetak';
         ntSt=document.createElement('style');ntSt.textContent='@page{size:A4 landscape;margin:10mm}';document.head.appendChild(ntSt);
-        document.body.classList.add('pn');window.print();
+        document.body.classList.add('pn');printAs('NOTA',ntRow);
       });
   });
   window.addEventListener('afterprint',endNtPrint);
@@ -2067,7 +2076,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       .then(function(){
         npBusy=false;bt.disabled=false;bt.textContent='Cetak';
         npSt=document.createElement('style');npSt.textContent='@page{size:792pt 612pt;margin:0}';document.head.appendChild(npSt);
-        document.body.classList.add('pp');window.print();
+        document.body.classList.add('pp');printAs('NOTA-PAJAK',npRow);
       });
   });
   window.addEventListener('afterprint',endNpPrint);
@@ -2175,7 +2184,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       .then(function(){
         ttBusy=false;b.disabled=false;b.textContent='Cetak';
         ttSt=document.createElement('style');ttSt.textContent='@page{size:792pt 612pt;margin:0}';document.head.appendChild(ttSt);
-        document.body.classList.add('ptt');window.print();
+        document.body.classList.add('ptt');printAs('Tanda-Terima',ttRow);
       });
   });
   window.addEventListener('afterprint',endTtPrint);
@@ -2299,7 +2308,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       })
       .then(function(){
         baBusy=false;b.disabled=false;b.textContent='Cetak';
-        document.body.classList.add('pb');window.print();
+        document.body.classList.add('pb');printAs('Berita-Acara',baRow);
       });
   });
   window.addEventListener('afterprint',function(){document.body.classList.remove('pb')});
@@ -2406,7 +2415,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       })
       .then(function(){
         shpBusy=false;b.disabled=false;b.textContent='Cetak';
-        document.body.classList.add('psh');window.print();
+        document.body.classList.add('psh');printAs('Surat-Hasil-Pemeriksaan',shpRow);
       });
   });
   window.addEventListener('afterprint',function(){document.body.classList.remove('psh')});
@@ -2469,6 +2478,7 @@ textarea.in{resize:vertical;min-height:72px;line-height:1.45}
       pesan:'Data SPPD <b>'+esc(r.nomor_bku)+'</b> ('+esc(r.penerima)+') akan dihapus permanen dari database dan tidak bisa dikembalikan.',
       ok:'Data SPPD berhasil dihapus.',reload:loadSppd},b);
   });
+
   render();$('tb').innerHTML='<tr><td colspan="13" class="state">Memuat data…</td></tr>';$('tbS').innerHTML='<tr><td colspan="15" class="state">Memuat data…</td></tr>';
   loadPajak();load();loadSppd();
 })();
