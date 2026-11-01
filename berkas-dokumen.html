@@ -261,6 +261,7 @@ table.dt{min-width:880px}
 #spBox{margin-top:16px}
 .lihat.alt{background:var(--track);color:var(--text)}.lihat.alt:hover{background:rgba(120,120,128,.28)}
 .lihat:disabled{opacity:.6;cursor:default}
+.lihat.del{background:rgba(255,69,58,.14);color:#c4261d}.lihat.del:hover{background:rgba(255,69,58,.26)}
 .bk-act{display:flex;gap:6px;justify-content:flex-end}
 .lihat{text-decoration:none;display:inline-block}
 /* Dropup Upload: PDF / Kamera */
@@ -296,6 +297,46 @@ table.dt{min-width:880px}
 .scn-bar button.on{background:var(--accent)}
 .scn-bar svg{width:18px;height:18px}
 .scn-sep{width:100%;height:0}
+/* Peringatan ukuran file (tengah layar) */
+.warn{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:rgba(0,0,0,0);visibility:hidden;pointer-events:none;transition:background .25s,visibility 0s linear .25s}
+.warn.open{background:rgba(40,12,8,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);visibility:visible;pointer-events:auto;transition:background .25s,visibility 0s}
+.warn-card{width:min(400px,100%);max-height:100%;overflow:auto;text-align:center;padding:0 22px 20px;border-radius:22px;background:rgba(255,255,255,.98);color:#1d1d1f;box-shadow:0 24px 60px rgba(120,20,10,.38),0 0 0 .5px rgba(0,0,0,.14)}
+.warn.open .warn-card{animation:wIn .38s cubic-bezier(.2,.9,.25,1.2)}
+.warn-card::before{content:"";display:block;height:9px;margin:0 -22px 22px;background:repeating-linear-gradient(135deg,#ffb020 0 12px,#2b2b2e 12px 24px)}
+.warn-ic{position:relative;width:76px;height:76px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(160deg,#ffb454,#f0780a 60%,#e5484d);box-shadow:0 8px 20px rgba(240,120,10,.45),inset 0 1.5px 0 rgba(255,255,255,.5)}
+.warn-ic svg{width:40px;height:40px}
+.warn-ic::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(240,120,10,.5);opacity:0}
+.warn.open .warn-ic{animation:wShake .6s .25s}
+.warn.open .warn-ic::after{animation:wPulse 1.4s .2s ease-out 2}
+.warn-card h2{font-size:20px;letter-spacing:-.01em;line-height:1.25;color:#b3261e}
+.warn-card p{margin-top:6px;font-size:14px;line-height:1.45;color:#4a4a4f}
+.warn-meter{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(120,120,128,.09);text-align:left}
+.warn-meter[hidden]{display:none}
+.wm-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:5px}
+.wm-row span{color:#6e6e73}.wm-row b{font-variant-numeric:tabular-nums}
+.wm-row b.bad{color:#c4261d}.wm-row b.ok{color:#1a8a30}
+.wm-bar{height:10px;border-radius:99px;background:rgba(120,120,128,.18);overflow:hidden;margin-bottom:10px}
+.wm-bar i{display:block;height:100%;border-radius:99px;animation:wmGrow .7s .2s cubic-bezier(.2,.8,.2,1) both}
+.wm-bar i.bad{background:linear-gradient(90deg,#ff9f0a,#ff453a)}.wm-bar i.ok{background:linear-gradient(90deg,#5be37a,#1fa23c)}
+.wm-over{display:inline-block;font-size:12px;font-weight:700;color:#c4261d;background:rgba(255,69,58,.12);padding:3px 10px;border-radius:99px}
+.warn-tips{list-style:none;margin:14px 0 0;text-align:left;font-size:13px;color:#3a3a3c;display:grid;gap:7px}
+.warn-tips:empty{display:none}
+.warn-tips li{position:relative;padding-left:22px;line-height:1.4}
+.warn-tips li::before{content:"";position:absolute;left:3px;top:.42em;width:8px;height:8px;border-radius:50%;background:#ff9f0a}
+.warn-btn{margin-top:18px;width:100%;min-height:46px;border-radius:13px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(160deg,#ffb454,#f0780a);box-shadow:0 6px 16px rgba(240,120,10,.4);transition:transform .15s,filter .15s}
+.warn-btn:hover{filter:brightness(1.06)}.warn-btn:active{transform:scale(.97)}
+.warn-card .warn-note{margin-top:12px;font-size:12px;line-height:1.4;color:#6e6e73;text-align:left}
+.warn-err{margin-top:12px;padding:9px 12px;border-radius:12px;font-size:13px;font-weight:600;line-height:1.4;color:#b3261e;background:rgba(255,69,58,.12);text-align:left}
+.warn-err[hidden],.warn-note[hidden],.warn-btn[hidden]{display:none}
+.warn-btn:disabled{opacity:.75;cursor:progress}
+.warn-btn.ghost{margin-top:8px;color:#1d1d1f;background:rgba(120,120,128,.16);box-shadow:none}
+.warn-btn.busy::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;vertical-align:-2px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:wSpin .8s linear infinite}
+@keyframes wSpin{to{transform:rotate(360deg)}}
+@keyframes wIn{from{opacity:0;transform:translateY(14px) scale(.9)}}
+@keyframes wShake{0%,100%{transform:none}20%{transform:rotate(-11deg)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@keyframes wPulse{from{opacity:1;transform:scale(.92)}to{opacity:0;transform:scale(1.4)}}
+@keyframes wmGrow{from{width:0}}
+@media (prefers-reduced-motion:reduce){.warn.open .warn-card,.warn.open .warn-ic,.warn.open .warn-ic::after,.wm-bar i{animation:none!important}}
 </style>
 <script>if(!('PageSwapEvent' in window))document.documentElement.classList.add('pt-fb');</script>
 </head>
@@ -315,7 +356,7 @@ table.dt{min-width:880px}
 
 <main class="wrap">
   <div class="head">
-    <div><h1>Berkas Dokumen</h1><p>Arsip Surat Order, Kwitansi, SPPD, NOTA, BAST, Bukti Pajak, Tanda Terima, Bukti Photo, dan kelengkapan berkas</p></div>
+    <div><h1>Berkas Dokumen</h1><p>Arsip Surat Order, Kwitansi, SPPD, NOTA, BAST, Bukti Pajak, Tanda Terima, Bukti Photo, dan kelengkapan berkas. Ukuran file maksimal 30 KB.</p></div>
   </div>
 
   <section class="panel box" id="bkBox">
@@ -354,6 +395,19 @@ table.dt{min-width:880px}
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="warn" id="warn" role="alertdialog" aria-modal="true" aria-labelledby="wTitle" aria-describedby="wMsg">
+  <div class="warn-card">
+    <div class="warn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+    <h2 id="wTitle">Ukuran File Terlalu Besar</h2>
+    <p id="wMsg"></p>
+    <div class="warn-meter" id="wMeter" hidden></div>
+    <ul class="warn-tips" id="wTips"></ul>
+    <p class="warn-note" id="wNote" hidden></p>
+    <div class="warn-err" id="wErr" role="alert" hidden></div>
+    <button type="button" class="warn-btn" id="wZip" hidden>Kompres ke 30 KB &amp; simpan</button>
+    <button type="button" class="warn-btn" id="wOk">Mengerti</button>
+  </div>
+</div>
 
 <div class="dock">
   <nav aria-label="Aksi halaman">
@@ -516,24 +570,67 @@ table.dt{min-width:880px}
         c:{t:o.nomor_order||x.n+' #'+(o.id||n+1),b:o.nomor_bku||o.nomor_bukti||'',s:o.nama_toko||'',l:x.n,r:tgl(o.tanggal)}}})};
   }
 
+  function delBtn(o){return o.file_url?'<button class="lihat del" type="button" data-del="'+o.id+'" title="Hapus berkas dari penyimpanan">Hapus</button>':''}
   function aksi(o){
     var up='<button class="lihat'+(o.file_url?' alt':'')+'" type="button" aria-haspopup="menu" aria-expanded="false" data-up="'+o.id+'">'+(o.file_url?'Ganti':'Upload')+'</button>';
-    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener" title="'+esc(o.file_nama||'')+'">Lihat PDF</a>':'')+up+'</div>';
+    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener" title="'+esc(o.file_nama||'')+'">Lihat PDF</a>':'')+up+delBtn(o)+'</div>';
   }
   function aksiFoto(o){
     var up='<button class="lihat'+(o.file_url?' alt':'')+'" type="button" aria-haspopup="menu" aria-expanded="false" data-up="'+o.id+'">'+(o.file_url?'Ganti':'Upload')+'</button>';
-    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener">Lihat</a>':'')+up+'</div>';
+    return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener">Lihat</a>':'')+up+delBtn(o)+'</div>';
   }
   var tm;function toast(m){var t=$('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('show')},4200)}
-  var upId=null,upBusy=false,MAXB=10*1024*1024;
+  var upId=null,upBusy=false,MAXB=30*1024,FOLDER='berkas-dokumen/',DIMS=[1000,800,640,520,420,340,280,220,180],QS=[.6,.45,.3,.2,.12]; /* batas 30 KB; semua file disimpan di bucket aset/berkas-dokumen/ */
+  function kb(n){return (n/1024).toFixed(1).replace('.',',')+' KB'}
+  /* Peringatan di tengah layar saat file melebihi batas; bisa langsung dikompres lalu disimpan */
+  var wEl=$('warn'),wBack=null,wPend=null,zipBusy=false,ZLBL='Kompres ke 30 KB & simpan';
+  function isPdfFile(f){return f.type==='application/pdf'||/\.pdf$/i.test(f.name||'')}
+  function setZip(b){var z=$('wZip');z.disabled=b;z.classList.toggle('busy',b);z.textContent=b?'Mengompres…':ZLBL;$('wOk').disabled=b}
+  function warnBig(o){
+    var sz=o.size||0,lim=MAXB,mx=Math.max(sz,lim),m=$('wMeter');
+    $('wMsg').textContent=o.msg||'File yang dipilih lebih besar dari batas 30 KB.';
+    if(sz>0){
+      m.innerHTML='<div class="wm-row"><span>Ukuran file</span><b class="bad">'+kb(sz)+'</b></div><div class="wm-bar"><i class="bad" style="width:'+(sz/mx*100).toFixed(1)+'%"></i></div>'
+        +'<div class="wm-row"><span>Batas maksimal</span><b class="ok">'+kb(lim)+'</b></div><div class="wm-bar"><i class="ok" style="width:'+(lim/mx*100).toFixed(1)+'%"></i></div>'
+        +(sz>lim?'<span class="wm-over">Kelebihan '+kb(sz-lim)+'</span>':'');
+      m.hidden=false;
+    }else m.hidden=true;
+    $('wTips').innerHTML=(o.tips||[]).map(function(t){return '<li>'+esc(t)+'</li>'}).join('');
+    wPend=o.file||null;zipBusy=false;
+    $('wZip').hidden=!wPend;$('wErr').hidden=true;
+    $('wNote').hidden=!wPend;
+    if(wPend)$('wNote').textContent=isPdfFile(wPend)?'Catatan: halaman PDF diubah menjadi gambar, jadi kualitas menurun dan teksnya tidak bisa disalin.':'Catatan: kualitas gambar akan menurun.';
+    $('wOk').textContent=wPend?'Batal':'Mengerti';$('wOk').className='warn-btn'+(wPend?' ghost':'');
+    setZip(false);
+    clearTimeout(tm);$('toast').classList.remove('show');
+    wBack=document.activeElement;wEl.classList.add('open');(wPend?$('wZip'):$('wOk')).focus();
+  }
+  function warnClose(){if(zipBusy)return;wEl.classList.remove('open');wPend=null;if(wBack&&wBack.focus){try{wBack.focus()}catch(e){}}wBack=null}
+  $('wOk').addEventListener('click',warnClose);
+  wEl.addEventListener('click',function(e){if(e.target===wEl)warnClose()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&wEl.classList.contains('open'))warnClose()});
+  $('wZip').addEventListener('click',function(){
+    var f=wPend;if(!f||zipBusy)return;
+    zipBusy=true;setZip(true);$('wErr').hidden=true;
+    compressFile(f).then(function(r){
+      if(!r||r.size>MAXB)throw new Error('File tidak bisa dikecilkan sampai 30 KB. Coba file lain atau kurangi halamannya.');
+      zipBusy=false;setZip(false);wPend=null;warnClose();
+      upload(r); /* langsung simpan ke bucket aset */
+    }).catch(function(e){
+      zipBusy=false;setZip(false);
+      $('wErr').textContent=(e&&e.name==='PasswordException')?'PDF diproteksi password, jadi tidak bisa dikompres.':((e&&e.message)||'Gagal mengompres file.');
+      $('wErr').hidden=false;
+    });
+  });
   function jerr(r){return r.text().then(function(x){var m=x;try{var j=JSON.parse(x);m=j.message||j.error||x}catch(e){}console.error('Supabase',r.status,x);throw new Error(m||('HTTP '+r.status))})}
   /* Bukti Photo: file foto (atau PDF) -> bucket aset/foto-kegiatan/<Nomor BKU>.<ext>, lalu dicatat di tabel foto_kegiatan */
   function uploadFoto(file,o){
+    if(file.size>MAXB){warnBig({size:file.size,msg:'File yang diunggah lebih besar dari batas 30 KB, jadi tidak bisa disimpan.',file:file,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan.']});return}
     var seg=String(o.nomor_bku).replace(/[^A-Za-z0-9._-]/g,'_'),nm=file.name||'',
       isPdf=file.type==='application/pdf'||/\.pdf$/i.test(nm),
       ext=isPdf?'pdf':(/png/i.test(file.type)||/\.png$/i.test(nm)?'png':(/webp/i.test(file.type)||/\.webp$/i.test(nm)?'webp':(/gif/i.test(file.type)||/\.gif$/i.test(nm)?'gif':'jpg'))),
       ctype=isPdf?'application/pdf':(file.type||'image/'+(ext==='jpg'?'jpeg':ext)),
-      path='foto-kegiatan/'+seg+'.'+ext,pub=SB_URL+'/storage/v1/object/public/aset/'+path,oldPath=o.file_path,
+      path=FOLDER+'foto-kegiatan/'+seg+'.'+ext,pub=SB_URL+'/storage/v1/object/public/aset/'+path,oldPath=o.file_path,
       A={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
     function J(extra){var h={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'};for(var k in extra)h[k]=extra[k];return h}
     upBusy=true;toast('Mengunggah '+nm+'…');
@@ -560,9 +657,10 @@ table.dt{min-width:880px}
       .then(function(){upBusy=false;draw();drawSp()});
   }
   function upload(file){
+    if(file.size>MAXB){warnBig({size:file.size,msg:'File yang diunggah lebih besar dari batas 30 KB, jadi tidak bisa disimpan.',file:file,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan.']});return}
     var X=T[upIdx],o=(data[upIdx]||[]).filter(function(x){return x.id==upId})[0];if(!o)return;
     if(X.k==='foto')return uploadFoto(file,o);
-    var path=(X.k==='surat'?'surat-order':X.k)+'/'+String(o.nomor_bku).replace(/[^A-Za-z0-9._-]/g,'_')+'.pdf',H={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
+    var path=FOLDER+(X.k==='surat'?'surat-order':X.k)+'/'+String(o.nomor_bku).replace(/[^A-Za-z0-9._-]/g,'_')+'.pdf',oldPath=o.file_path,H={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
     upBusy=true;toast('Mengunggah '+file.name+'…');
     var btns=document.querySelectorAll('button[data-up]');[].forEach.call(btns,function(b){b.disabled=true});
     fetch(SB_URL+'/storage/v1/object/aset/'+path,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/pdf','x-upsert':'true','cache-control':'max-age=3600'},body:file})
@@ -572,7 +670,9 @@ table.dt{min-width:880px}
         return fetch(SB_URL+'/rest/v1/'+X.t+'?id=eq.'+o.id,{method:'PATCH',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(rec)})
           .then(function(r){return r.ok?rec:jerr(r)});
       })
-      .then(function(rec){for(var k in rec)o[k]=rec[k];toast('PDF untuk '+o.nomor_bku+' berhasil diunggah.')})
+      .then(function(rec){for(var k in rec)o[k]=rec[k];
+        if(oldPath&&oldPath!==path)fetch(SB_URL+'/storage/v1/object/aset/'+oldPath,{method:'DELETE',headers:H}).catch(function(){}); /* buang file lama agar storage tidak menumpuk */
+        toast('PDF untuk '+o.nomor_bku+' berhasil diunggah ('+kb(file.size)+').')})
       .catch(function(e){var m=e.message||'';
         toast(/bucket not found/i.test(m)?'Bucket "aset" belum ada di Supabase Storage. Jalankan bagian 7 di supabase-surat-order.sql.'
           :/row-level security|violates|unauthorized|not authorized/i.test(m)?'Akses ditolak oleh Storage. Jalankan policy "aset_all" di supabase-surat-order.sql.'
@@ -580,6 +680,103 @@ table.dt{min-width:880px}
           :/mime|not supported/i.test(m)?'Bucket "aset" tidak mengizinkan file PDF. Izinkan application/pdf di pengaturan bucket.'
           :/size|exceed|too large/i.test(m)?'Ukuran file melebihi batas bucket "aset".'
           :'Gagal mengunggah: '+m)})
+      .then(function(){upBusy=false;draw();drawSp()});
+  }
+  /* Susun halaman jadi PDF; turunkan resolusi & kualitas bertahap sampai <= 30 KB (atau mentok di batas terendah) */
+  function fitPages(pages){
+    return (function tryD(d){
+      var cvs=pages.map(function(p){return renderPage(p,DIMS[d])});
+      return (function tryQ(n){
+        return Promise.all(cvs.map(function(c){return toJpeg(c,QS[n])})).then(function(pp){
+          var pdf=jpegsToPdf(pp);
+          if(pdf.size<=MAXB)return pdf;
+          if(n<QS.length-1)return tryQ(n+1);
+          if(d<DIMS.length-1)return tryD(d+1);
+          return pdf;
+        });
+      })(0);
+    })(0);
+  }
+  /* pdf.js dimuat hanya saat diperlukan (cdnjs, versi dipatok) */
+  var pdfP=null;
+  function loadPdfJs(){
+    if(window.pdfjsLib&&pdfjsLib.GlobalWorkerOptions&&pdfjsLib.GlobalWorkerOptions.workerSrc)return Promise.resolve(window.pdfjsLib);
+    if(pdfP)return pdfP;
+    var B='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    pdfP=new Promise(function(res,rej){
+      if(window.pdfjsLib)return res();
+      var sc=document.createElement('script');sc.src=B+'pdf.min.js';sc.onload=res;
+      sc.onerror=function(){rej(new Error('Pustaka PDF gagal dimuat. Periksa koneksi internet.'))};
+      document.head.appendChild(sc);
+    }).then(function(){return fetch(B+'pdf.worker.min.js')})
+      .then(function(r){if(!r.ok)throw new Error('Pustaka PDF gagal dimuat.');return r.text()})
+      .then(function(t){window.pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([t],{type:'text/javascript'}));return window.pdfjsLib})
+      .catch(function(e){pdfP=null;throw e});
+    return pdfP;
+  }
+  function compressPdf(f){
+    return Promise.all([loadPdfJs(),f.arrayBuffer()]).then(function(z){return z[0].getDocument({data:z[1]}).promise}).then(function(doc){
+      if(doc.numPages>MAXPG)throw new Error('PDF terlalu banyak halaman ('+doc.numPages+'). Maksimal '+MAXPG+' halaman.');
+      var pages=[];
+      function next(i){
+        if(i>doc.numPages)return pages;
+        return doc.getPage(i).then(function(pg){
+          var v1=pg.getViewport({scale:1}),vp=pg.getViewport({scale:1100/Math.max(v1.width,v1.height)}),c=document.createElement('canvas'),g;
+          c.width=Math.max(1,Math.round(vp.width));c.height=Math.max(1,Math.round(vp.height));
+          g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);
+          return pg.render({canvasContext:g,viewport:vp}).promise.then(function(){pages.push({src:c,f:'asli',c:{x0:0,y0:0,x1:1,y1:1}});return next(i+1)});
+        });
+      }
+      return Promise.resolve(next(1)).then(function(pp){if(doc.destroy)doc.destroy();return fitPages(pp)});
+    }).then(function(pdf){
+      if(pdf.size>MAXB)return null;
+      return new File([pdf],(f.name||'berkas.pdf').replace(/\.pdf$/i,'')+'-kompres.pdf',{type:'application/pdf'});
+    });
+  }
+  function compressFile(f){return isPdfFile(f)?compressPdf(f):compressImage(f)}
+  /* Foto dari galeri: kecilkan otomatis sampai <= 30 KB (JPEG) */
+  function compressImage(f){
+    if(f.size<=MAXB)return Promise.resolve(f);
+    return loadImg(f).then(function(im){
+      var w=im.width||im.naturalWidth,h=im.height||im.naturalHeight,base=(f.name||'foto').replace(/\.[^.]+$/,'')+'.jpg';
+      function tryD(d){
+        if(d>=DIMS.length){if(im.close)im.close();return null}
+        var k=Math.min(1,DIMS[d]/Math.max(w,h)),c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));
+        var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+        return (function tryQ(q){
+          if(q>=QS.length)return tryD(d+1);
+          return new Promise(function(res){c.toBlob(res,'image/jpeg',QS[q])}).then(function(b){
+            if(b&&b.size<=MAXB){if(im.close)im.close();return new File([b],base,{type:'image/jpeg'})}
+            return tryQ(q+1);
+          });
+        })(0);
+      }
+      return Promise.resolve(tryD(0));
+    });
+  }
+  /* Hapus berkas: buang file dari bucket aset lalu kosongkan catatannya di tabel */
+  function hapus(b,idx){
+    var X=T[idx],o=(data[idx]||[]).filter(function(x){return x.id==b.dataset.del})[0];
+    if(!o||!o.file_path||upBusy)return;
+    if(!window.confirm('Hapus berkas '+X.n+' untuk '+o.nomor_bku+'?\nFile dihapus permanen dari penyimpanan.'))return;
+    var H={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},H2={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json',Prefer:'return=minimal'};
+    upBusy=true;toast('Menghapus berkas…');
+    [].forEach.call(document.querySelectorAll('button[data-up],button[data-del]'),function(x){x.disabled=true});
+    fetch(SB_URL+'/storage/v1/object/aset/'+o.file_path,{method:'DELETE',headers:H})
+      .then(function(r){return r.ok?r:jerr(r)})
+      .then(function(){
+        if(X.k==='foto')return o.foto_id?fetch(SB_URL+'/rest/v1/foto_kegiatan?id=eq.'+o.foto_id,{method:'DELETE',headers:H}).then(function(r){return r.ok?0:jerr(r)}):0;
+        return fetch(SB_URL+'/rest/v1/'+X.t+'?id=eq.'+o.id,{method:'PATCH',headers:H2,body:JSON.stringify({file_path:null,file_url:null,file_nama:null,file_ukuran:null,file_diunggah_at:null})})
+          .then(function(r){return r.ok?0:jerr(r)});
+      })
+      .then(function(){
+        o.file_path=o.file_url=o.file_nama=o.file_ukuran=o.file_diunggah_at=null;
+        if(X.k==='foto'){o.foto_id=null;o.keterangan=null}
+        toast('Berkas '+o.nomor_bku+' dihapus.');
+      })
+      .catch(function(e){var m=e.message||'';
+        toast(/not found|row-level|violates|unauthorized|not authorized/i.test(m)?'File tidak ditemukan atau akses hapus ditolak. Jalankan supabase-berkas-storage.sql (policy aset_all).':'Gagal menghapus: '+m)})
       .then(function(){upBusy=false;draw();drawSp()});
   }
   /* Dropup Upload: pilih PDF atau Kamera */
@@ -597,9 +794,11 @@ table.dt{min-width:880px}
     b.setAttribute('aria-expanded','true');upBtn=b;
   }
   $('bkBody').addEventListener('click',function(e){
+    var d=e.target.closest('button[data-del]');if(d){if(!upBusy)hapus(d,cur);return}
     var b=e.target.closest('button[data-up]');if(!b||upBusy)return;upOpen(b,cur);
   });
   $('spBody').addEventListener('click',function(e){
+    var d=e.target.closest('button[data-del]');if(d){if(!upBusy)hapus(d,SP);return}
     var b=e.target.closest('button[data-up]');if(!b||upBusy)return;upOpen(b,SP);
   });
   document.addEventListener('click',function(e){if(upBtn&&!e.target.closest('#upMenu')&&!e.target.closest('button[data-up]'))upClose()});
@@ -746,18 +945,11 @@ table.dt{min-width:880px}
   $('scSave').addEventListener('click',function(){
     if(sc.busy||!sc.pages.length)return;
     var o=(data[upIdx]||[]).filter(function(x){return x.id==upId})[0],
-      base=String((o&&(o.nomor_bku||o.nomor_order))||'berkas').replace(/[^A-Za-z0-9._-]/g,'_'),btn=$('scSave'),qs=[.85,.65,.45];
+      base=String((o&&(o.nomor_bku||o.nomor_order))||'berkas').replace(/[^A-Za-z0-9._-]/g,'_'),btn=$('scSave');
     sc.busy=true;btn.disabled=true;btn.textContent='Memproses…';
     setTimeout(function(){
-      var cvs=sc.pages.map(function(p){return renderPage(p,1800)});
-      (function tryQ(n){
-        return Promise.all(cvs.map(function(c){return toJpeg(c,qs[n])})).then(function(pp){
-          var pdf=jpegsToPdf(pp);
-          if(pdf.size>MAXB&&n<qs.length-1)return tryQ(n+1);
-          return pdf;
-        });
-      })(0).then(function(pdf){
-        if(pdf.size>MAXB){toast('Ukuran PDF melebihi 10 MB. Kurangi jumlah halaman.');return}
+      fitPages(sc.pages).then(function(pdf){
+        if(pdf.size>MAXB){warnBig({size:pdf.size,msg:'Hasil pindaian masih lebih besar dari 30 KB walau sudah dikecilkan semaksimal mungkin.',tips:['Kurangi jumlah halaman.','Pakai filter Hitam Putih, ukurannya paling kecil.','Potong bagian kosong di tepi kertas.']});return}
         var file=new File([pdf],'scan-'+base+'.pdf',{type:'application/pdf'});
         scClose();upload(file);
       }).catch(function(e){toast(e.message||'Gagal membuat PDF.')})
@@ -769,7 +961,13 @@ table.dt{min-width:880px}
     var f=this.files&&this.files[0];if(!f)return;
     var isF=T[upIdx].k==='foto',isPdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name),isImg=/^image\/(jpeg|png|webp|gif)$/.test(f.type)||/\.(jpe?g|png|webp|gif)$/i.test(f.name);
     if(isF?!(isPdf||isImg):!isPdf){toast(isF?'File harus berupa foto (JPG/PNG/WEBP) atau PDF.':'File harus berformat PDF.');return}
-    if(f.size>MAXB){toast('Ukuran file maksimal 10 MB.');return}
+    if(isImg&&!isPdf){
+      toast('Mengecilkan foto…');
+      compressImage(f).then(function(j){if(!j){warnBig({size:f.size,msg:'Foto ini tidak bisa dikecilkan sampai di bawah 30 KB.',tips:['Coba foto lain yang lebih sederhana (latar tidak ramai).','Atau pakai tombol Kamera untuk memotret langsung.']});return}upload(j)})
+        .catch(function(e){toast(e.message||'Gagal memproses foto.')});
+      return;
+    }
+    if(f.size>MAXB){warnBig({size:f.size,msg:'PDF yang dipilih lebih besar dari batas 30 KB, jadi tidak bisa diunggah.',file:f,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan ke 30 KB.']});return}
     upload(f);
   });
 
