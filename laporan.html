@@ -268,8 +268,8 @@ table.dt{min-width:880px}
   </div>
   <span class="sp"></span>
   <div class="acct" aria-label="Akun masuk">
-    <div><b>Budi Santoso</b><small>Admin Utama</small></div>
-    <span class="avatar">BS</span>
+    <div><b id="acName">Kepala Sekolah</b><small id="acRole">Kepala Sekolah</small></div>
+    <span class="avatar" id="acAva">KS</span>
   </div>
 </header>
 
@@ -312,10 +312,16 @@ table.dt{min-width:880px}
   var CK='simpelpay_nav_sekolah';
   var logoEl=document.getElementById('navLogo'),nameEl=document.getElementById('navName'),subEl=document.getElementById('navSub');
   var dummyLogo=logoEl.innerHTML;
+  var acName=document.getElementById('acName'),acAva=document.getElementById('acAva');
   function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function apply(d){
     if(!d)return;
     if(d.nama)nameEl.textContent=d.nama;
+    if(d.kepsek){
+      acName.textContent=d.kepsek;acName.title=d.nip?('NIP '+d.nip):'';
+      var p=String(d.kepsek).replace(/,.*$/,'').trim().split(/\s+/).filter(Boolean);
+      acAva.textContent=((p[0]||'K')[0]+(p.length>1?p[1][0]:'')).toUpperCase();
+    }
     subEl.textContent=d.sub||'';
     if(d.logo){
       var img=new Image();img.alt='';
@@ -325,12 +331,12 @@ table.dt{min-width:880px}
     }else{logoEl.innerHTML=dummyLogo}
   }
   try{apply(JSON.parse(localStorage.getItem(CK)||'null'))}catch(e){}
-  fetch(SB_URL+'/rest/v1/identitas_sekolah?id=eq.1&select=nama_sekolah,kabupaten,provinsi,logo_url,updated_at',
+  fetch(SB_URL+'/rest/v1/identitas_sekolah?id=eq.1&select=nama_sekolah,kabupaten,provinsi,logo_url,updated_at,nama_kepsek,nip',
     {headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}})
     .then(function(r){return r.ok?r.json():Promise.reject(r.status)})
     .then(function(rows){
       var r=rows&&rows[0];if(!r)return;
-      var d={nama:r.nama_sekolah,sub:[r.kabupaten,r.provinsi].filter(Boolean).join(', '),
+      var d={nama:r.nama_sekolah,kepsek:r.nama_kepsek||'',nip:r.nip||'',sub:[r.kabupaten,r.provinsi].filter(Boolean).join(', '),
              logo:r.logo_url?r.logo_url+'?v='+encodeURIComponent(r.updated_at||''):''};
       apply(d);
       try{localStorage.setItem(CK,JSON.stringify(d))}catch(e){}
