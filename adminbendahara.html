@@ -261,42 +261,61 @@ html,body{overflow-x:hidden}
   var nf=function(n){return n.toLocaleString('id-ID');};
   var pct=function(a,b){return b?(Math.round(a/b*1000)/10).toLocaleString('id-ID')+'%':'0%';};
 
-  /* Data contoh (dummy) — ganti dengan data asli dari tabel transaksi */
+  /* Data asli dari tabel transaksi_pembayaran (sama dengan halaman Transaksi Pembayaran) */
+  var SB_URL=window.SIMPELPAY_CONFIG.SUPABASE_URL;
+  var SB_KEY=window.SIMPELPAY_CONFIG.SUPABASE_ANON_KEY;
+  var rp=function(n){return 'Rp '+nf(Number(n)||0);};
   var bulan=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  var cur =[18,22,27,24,31,26,34,29,33, 9, 0, 0];   /* jumlah transaksi tahun ini */
-  var prev=[14,19,21,23,24,27,29,27,30,31,29,36];   /* jumlah transaksi tahun lalu */
-  var proses=22;                                    /* transaksi yang masih diproses */
-
-  var now=new Date(),yr=now.getFullYear(),mi=now.getMonth();
-  document.getElementById('period').textContent='Tahun '+yr;
+  var yr=new Date().getFullYear();
+  document.getElementById('period').textContent='Semua data';
   document.getElementById('lgCur').textContent=yr;
   document.getElementById('lgPrev').textContent=yr-1;
 
-  var total=cur.reduce(function(a,b){return a+b;},0);
-  var selesai=total-proses;
-  var prevSame=prev.slice(0,mi+1).reduce(function(a,b){return a+b;},0);
-  var chg=prevSame?Math.round((total-prevSame)/prevSame*1000)/10:0;
-  var chgTxt=(chg>=0?'+':'')+chg.toLocaleString('id-ID')+'% dari periode sama tahun lalu';
+  function draw(rows,loading){
+    var total=rows.length;
+    var proses=rows.filter(function(r){return r.status!=='selesai';}).length;
+    var selesai=total-proses;
+    var sum=rows.reduce(function(a,r){return a+(Number(r.pengeluaran)||0);},0);
 
-  /* Kartu statistik */
-  var s=[
-    ['Total transaksi pembayaran',nf(total),chgTxt,chg>=0?'up':'down','list','linear-gradient(160deg,#4da3ff,#0a5fe0)'],
-    ['Total selesai',nf(selesai),pct(selesai,total)+' dari total transaksi','up','check','linear-gradient(160deg,#5be37a,#1fa23c)'],
-    ['Total diproses',nf(proses),pct(proses,total)+' dari total transaksi','mid','clock','linear-gradient(160deg,#ffb454,#f0780a)']
-  ];
-  document.getElementById('stats').innerHTML=s.map(function(x){
-    return '<div class="panel stat"><div class="ic" style="background:'+x[5]+'">'+svg(x[4])+'</div><small>'+x[0]+'</small><b>'+x[1]+'</b><span class="delta '+x[3]+'">'+x[2]+'</span></div>';}).join('');
+    /* Jumlah transaksi per bulan: tahun ini vs tahun lalu */
+    var cur=[0,0,0,0,0,0,0,0,0,0,0,0],prev=[0,0,0,0,0,0,0,0,0,0,0,0];
+    rows.forEach(function(r){
+      var d=String(r.tanggal||'').split('-'),y=+d[0],m=+d[1]-1;
+      if(m<0||m>11)return;
+      if(y===yr)cur[m]++;else if(y===yr-1)prev[m]++;
+    });
 
-  /* Grafik batang vertikal */
-  var max=Math.max(10,Math.ceil(Math.max.apply(null,cur.concat(prev))/10)*10),v=document.getElementById('vchart');
-  var h='<span class="yl" style="bottom:22px">0</span><span class="yl" style="bottom:calc(22px + (100% - 22px)*.5)">'+(max/2)+'</span><span class="yl" style="bottom:calc(100% - 4px)">'+max+'</span>';
-  bulan.forEach(function(m,i){
-    h+='<div class="col" tabindex="0"><div class="tip">'+m+': '+cur[i]+' transaksi · lalu '+prev[i]+'</div><div class="pair"><div class="b prev" data-h="'+(prev[i]/max*100)+'"></div><div class="b cur" data-h="'+(cur[i]/max*100)+'"></div></div><span>'+m+'</span></div>';
-  });
-  v.innerHTML=h;
-  requestAnimationFrame(function(){requestAnimationFrame(function(){
-    document.querySelectorAll('.b').forEach(function(b){b.style.height=b.dataset.h+'%';});
-  });});
+    /* Kartu statistik (sama dengan kartu di halaman Transaksi Pembayaran) */
+    var s=[
+      ['Total transaksi pembayaran',loading?'…':nf(total),loading?'Memuat data…':'Pengeluaran '+rp(sum),'up','list','linear-gradient(160deg,#4da3ff,#0a5fe0)'],
+      ['Total selesai',loading?'…':nf(selesai),pct(selesai,total)+' dari total transaksi','up','check','linear-gradient(160deg,#5be37a,#1fa23c)'],
+      ['Total diproses',loading?'…':nf(proses),pct(proses,total)+' dari total transaksi','mid','clock','linear-gradient(160deg,#ffb454,#f0780a)']
+    ];
+    document.getElementById('stats').innerHTML=s.map(function(x){
+      return '<div class="panel stat"><div class="ic" style="background:'+x[5]+'">'+svg(x[4])+'</div><small>'+x[0]+'</small><b>'+x[1]+'</b><span class="delta '+x[3]+'">'+x[2]+'</span></div>';}).join('');
+
+    /* Grafik batang vertikal */
+    var max=Math.max(10,Math.ceil(Math.max.apply(null,cur.concat(prev))/10)*10),v=document.getElementById('vchart');
+    var h='<span class="yl" style="bottom:22px">0</span><span class="yl" style="bottom:calc(22px + (100% - 22px)*.5)">'+(max/2)+'</span><span class="yl" style="bottom:calc(100% - 4px)">'+max+'</span>';
+    bulan.forEach(function(m,i){
+      h+='<div class="col" tabindex="0"><div class="tip">'+m+': '+cur[i]+' transaksi · lalu '+prev[i]+'</div><div class="pair"><div class="b prev" data-h="'+(prev[i]/max*100)+'"></div><div class="b cur" data-h="'+(cur[i]/max*100)+'"></div></div><span>'+m+'</span></div>';
+    });
+    v.innerHTML=h;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      document.querySelectorAll('.b').forEach(function(b){b.style.height=b.dataset.h+'%';});
+    });});
+  }
+
+  draw([],true);
+  fetch(SB_URL+'/rest/v1/transaksi_pembayaran?select=tanggal,status,pengeluaran&order=tanggal.desc',
+    {headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}})
+    .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
+    .then(function(rows){draw(rows||[],false);})
+    .catch(function(){
+      draw([],false);
+      var p=document.querySelector('.head p');
+      if(p)p.textContent='Gagal memuat data transaksi. Periksa koneksi lalu muat ulang halaman.';
+    });
 
   /* Menu Bendahara */
   var M=[['Profil Bendahara','admin','#0a7aff','profil-bendahara.html'],['Informasi Pajak','tax','#ff9f0a','informasi-pajak.html'],['Data Penerima Pembayaran','users','#af52de','data-penerima-pembayaran.html'],['Transaksi Pembayaran','pay','#28c840','transaksi-pembayaran.html']];
