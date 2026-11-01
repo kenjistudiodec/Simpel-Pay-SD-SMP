@@ -439,16 +439,50 @@ dialog{--text:#1d1d1f;--muted:#6e6e73;--accent:#0a7aff;--accent-2:#0062d6;--line
 </script>
 
 
-             <!-- 🔥 SERVICE WORKER -->
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js')
-            .then(reg => console.log('Service Worker aktif'))
-            .catch(err => console.log('SW gagal:', err));
-        });
-    }
-    </script>
+             <!-- 🔥 BANNER INSTALL PWA -->
+<div id="installBanner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:480px;margin:0 auto;background:#fff;color:#1d1d1f;border-radius:14px;padding:14px 16px;box-shadow:0 8px 30px rgba(0,0,0,.25);align-items:center;justify-content:space-between;gap:12px;font-family:sans-serif">
+  <span>Install <b>SIMPEL-PAY</b> di perangkat Anda?</span>
+  <span style="white-space:nowrap">
+    <button id="btnInstall" style="background:#667eea;color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer">Install</button>
+    <button id="btnLater" style="background:none;border:0;padding:8px;cursor:pointer;color:#666">Nanti</button>
+  </span>
+</div>
+
+<!-- 🔥 SERVICE WORKER + INSTALL PROMPT -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('Service Worker aktif'))
+      .catch(err => console.log('SW gagal:', err));
+  });
+}
+
+let deferredPrompt;
+const installBanner = document.getElementById('installBanner');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBanner.style.display = 'flex';
+});
+
+document.getElementById('btnInstall').addEventListener('click', async () => {
+  installBanner.style.display = 'none';
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+
+document.getElementById('btnLater').addEventListener('click', () => {
+  installBanner.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  installBanner.style.display = 'none';
+});
+</script>
 
 </body>
 </html>
