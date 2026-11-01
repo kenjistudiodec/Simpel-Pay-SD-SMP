@@ -356,7 +356,7 @@ table.dt{min-width:880px}
 
 <main class="wrap">
   <div class="head">
-    <div><h1>Berkas Dokumen</h1><p>Arsip Surat Order, Kwitansi, SPPD, NOTA, BAST, Bukti Pajak, Tanda Terima, Bukti Photo, dan kelengkapan berkas. Ukuran file maksimal 30 KB.</p></div>
+    <div><h1>Berkas Dokumen</h1><p>Arsip Surat Order, Kwitansi, SPPD, NOTA, BAST, Bukti Pajak, Tanda Terima, Bukti Photo, dan kelengkapan berkas. Ukuran file maksimal 50 KB.</p></div>
   </div>
 
   <section class="panel box" id="bkBox">
@@ -404,7 +404,7 @@ table.dt{min-width:880px}
     <ul class="warn-tips" id="wTips"></ul>
     <p class="warn-note" id="wNote" hidden></p>
     <div class="warn-err" id="wErr" role="alert" hidden></div>
-    <button type="button" class="warn-btn" id="wZip" hidden>Kompres ke 30 KB &amp; simpan</button>
+    <button type="button" class="warn-btn" id="wZip" hidden>Kompres ke 50 KB &amp; simpan</button>
     <button type="button" class="warn-btn" id="wOk">Mengerti</button>
   </div>
 </div>
@@ -580,15 +580,15 @@ table.dt{min-width:880px}
     return '<div class="bk-act">'+(o.file_url?'<a class="lihat" href="'+esc(o.file_url)+'" target="_blank" rel="noopener">Lihat</a>':'')+up+delBtn(o)+'</div>';
   }
   var tm;function toast(m){var t=$('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('show')},4200)}
-  var upId=null,upBusy=false,MAXB=30*1024,FOLDER='berkas-dokumen/',DIMS=[1000,800,640,520,420,340,280,220,180],QS=[.6,.45,.3,.2,.12]; /* batas 30 KB; semua file disimpan di bucket aset/berkas-dokumen/ */
+  var upId=null,upBusy=false,MAXB=50*1024,FOLDER='berkas-dokumen/',DIMS=[1000,800,640,520,420,340,280,220,180],QS=[.6,.45,.3,.2,.12]; /* batas 50 KB; semua file disimpan di bucket aset/berkas-dokumen/ */
   function kb(n){return (n/1024).toFixed(1).replace('.',',')+' KB'}
   /* Peringatan di tengah layar saat file melebihi batas; bisa langsung dikompres lalu disimpan */
-  var wEl=$('warn'),wBack=null,wPend=null,zipBusy=false,ZLBL='Kompres ke 30 KB & simpan';
+  var wEl=$('warn'),wBack=null,wPend=null,zipBusy=false,ZLBL='Kompres ke 50 KB & simpan';
   function isPdfFile(f){return f.type==='application/pdf'||/\.pdf$/i.test(f.name||'')}
   function setZip(b){var z=$('wZip');z.disabled=b;z.classList.toggle('busy',b);z.textContent=b?'Mengompres…':ZLBL;$('wOk').disabled=b}
   function warnBig(o){
     var sz=o.size||0,lim=MAXB,mx=Math.max(sz,lim),m=$('wMeter');
-    $('wMsg').textContent=o.msg||'File yang dipilih lebih besar dari batas 30 KB.';
+    $('wMsg').textContent=o.msg||'File yang dipilih lebih besar dari batas 50 KB.';
     if(sz>0){
       m.innerHTML='<div class="wm-row"><span>Ukuran file</span><b class="bad">'+kb(sz)+'</b></div><div class="wm-bar"><i class="bad" style="width:'+(sz/mx*100).toFixed(1)+'%"></i></div>'
         +'<div class="wm-row"><span>Batas maksimal</span><b class="ok">'+kb(lim)+'</b></div><div class="wm-bar"><i class="ok" style="width:'+(lim/mx*100).toFixed(1)+'%"></i></div>'
@@ -613,7 +613,7 @@ table.dt{min-width:880px}
     var f=wPend;if(!f||zipBusy)return;
     zipBusy=true;setZip(true);$('wErr').hidden=true;
     compressFile(f).then(function(r){
-      if(!r||r.size>MAXB)throw new Error('File tidak bisa dikecilkan sampai 30 KB. Coba file lain atau kurangi halamannya.');
+      if(!r||r.size>MAXB)throw new Error('File tidak bisa dikecilkan sampai 50 KB. Coba file lain atau kurangi halamannya.');
       zipBusy=false;setZip(false);wPend=null;warnClose();
       upload(r); /* langsung simpan ke bucket aset */
     }).catch(function(e){
@@ -625,7 +625,7 @@ table.dt{min-width:880px}
   function jerr(r){return r.text().then(function(x){var m=x;try{var j=JSON.parse(x);m=j.message||j.error||x}catch(e){}console.error('Supabase',r.status,x);throw new Error(m||('HTTP '+r.status))})}
   /* Bukti Photo: file foto (atau PDF) -> bucket aset/foto-kegiatan/<Nomor BKU>.<ext>, lalu dicatat di tabel foto_kegiatan */
   function uploadFoto(file,o){
-    if(file.size>MAXB){warnBig({size:file.size,msg:'File yang diunggah lebih besar dari batas 30 KB, jadi tidak bisa disimpan.',file:file,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan.']});return}
+    if(file.size>MAXB){warnBig({size:file.size,msg:'File yang diunggah lebih besar dari batas 50 KB, jadi tidak bisa disimpan.',file:file,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan.']});return}
     var seg=String(o.nomor_bku).replace(/[^A-Za-z0-9._-]/g,'_'),nm=file.name||'',
       isPdf=file.type==='application/pdf'||/\.pdf$/i.test(nm),
       ext=isPdf?'pdf':(/png/i.test(file.type)||/\.png$/i.test(nm)?'png':(/webp/i.test(file.type)||/\.webp$/i.test(nm)?'webp':(/gif/i.test(file.type)||/\.gif$/i.test(nm)?'gif':'jpg'))),
@@ -657,7 +657,7 @@ table.dt{min-width:880px}
       .then(function(){upBusy=false;draw();drawSp()});
   }
   function upload(file){
-    if(file.size>MAXB){warnBig({size:file.size,msg:'File yang diunggah lebih besar dari batas 30 KB, jadi tidak bisa disimpan.',file:file,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan.']});return}
+    if(file.size>MAXB){warnBig({size:file.size,msg:'File yang diunggah lebih besar dari batas 50 KB, jadi tidak bisa disimpan.',file:file,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan.']});return}
     var X=T[upIdx],o=(data[upIdx]||[]).filter(function(x){return x.id==upId})[0];if(!o)return;
     if(X.k==='foto')return uploadFoto(file,o);
     var path=FOLDER+(X.k==='surat'?'surat-order':X.k)+'/'+String(o.nomor_bku).replace(/[^A-Za-z0-9._-]/g,'_')+'.pdf',oldPath=o.file_path,H={apikey:SB_KEY,Authorization:'Bearer '+SB_KEY};
@@ -682,7 +682,7 @@ table.dt{min-width:880px}
           :'Gagal mengunggah: '+m)})
       .then(function(){upBusy=false;draw();drawSp()});
   }
-  /* Susun halaman jadi PDF; turunkan resolusi & kualitas bertahap sampai <= 30 KB (atau mentok di batas terendah) */
+  /* Susun halaman jadi PDF; turunkan resolusi & kualitas bertahap sampai <= 50 KB (atau mentok di batas terendah) */
   function fitPages(pages){
     return (function tryD(d){
       var cvs=pages.map(function(p){return renderPage(p,DIMS[d])});
@@ -734,7 +734,7 @@ table.dt{min-width:880px}
     });
   }
   function compressFile(f){return isPdfFile(f)?compressPdf(f):compressImage(f)}
-  /* Foto dari galeri: kecilkan otomatis sampai <= 30 KB (JPEG) */
+  /* Foto dari galeri: kecilkan otomatis sampai <= 50 KB (JPEG) */
   function compressImage(f){
     if(f.size<=MAXB)return Promise.resolve(f);
     return loadImg(f).then(function(im){
@@ -949,7 +949,7 @@ table.dt{min-width:880px}
     sc.busy=true;btn.disabled=true;btn.textContent='Memproses…';
     setTimeout(function(){
       fitPages(sc.pages).then(function(pdf){
-        if(pdf.size>MAXB){warnBig({size:pdf.size,msg:'Hasil pindaian masih lebih besar dari 30 KB walau sudah dikecilkan semaksimal mungkin.',tips:['Kurangi jumlah halaman.','Pakai filter Hitam Putih, ukurannya paling kecil.','Potong bagian kosong di tepi kertas.']});return}
+        if(pdf.size>MAXB){warnBig({size:pdf.size,msg:'Hasil pindaian masih lebih besar dari 50 KB walau sudah dikecilkan semaksimal mungkin.',tips:['Kurangi jumlah halaman.','Pakai filter Hitam Putih, ukurannya paling kecil.','Potong bagian kosong di tepi kertas.']});return}
         var file=new File([pdf],'scan-'+base+'.pdf',{type:'application/pdf'});
         scClose();upload(file);
       }).catch(function(e){toast(e.message||'Gagal membuat PDF.')})
@@ -963,11 +963,11 @@ table.dt{min-width:880px}
     if(isF?!(isPdf||isImg):!isPdf){toast(isF?'File harus berupa foto (JPG/PNG/WEBP) atau PDF.':'File harus berformat PDF.');return}
     if(isImg&&!isPdf){
       toast('Mengecilkan foto…');
-      compressImage(f).then(function(j){if(!j){warnBig({size:f.size,msg:'Foto ini tidak bisa dikecilkan sampai di bawah 30 KB.',tips:['Coba foto lain yang lebih sederhana (latar tidak ramai).','Atau pakai tombol Kamera untuk memotret langsung.']});return}upload(j)})
+      compressImage(f).then(function(j){if(!j){warnBig({size:f.size,msg:'Foto ini tidak bisa dikecilkan sampai di bawah 50 KB.',tips:['Coba foto lain yang lebih sederhana (latar tidak ramai).','Atau pakai tombol Kamera untuk memotret langsung.']});return}upload(j)})
         .catch(function(e){toast(e.message||'Gagal memproses foto.')});
       return;
     }
-    if(f.size>MAXB){warnBig({size:f.size,msg:'PDF yang dipilih lebih besar dari batas 30 KB, jadi tidak bisa diunggah.',file:f,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan ke 30 KB.']});return}
+    if(f.size>MAXB){warnBig({size:f.size,msg:'PDF yang dipilih lebih besar dari batas 50 KB, jadi tidak bisa diunggah.',file:f,tips:['Klik Kompres untuk mengecilkan dan menyimpan otomatis.','Atau pakai tombol Kamera: dokumen dipindai dan otomatis dikecilkan ke 50 KB.']});return}
     upload(f);
   });
 
